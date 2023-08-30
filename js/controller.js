@@ -51,6 +51,16 @@ function stopTether(){
 	});
 }
 
+function checkTeherStatus() {
+	$.ajax({
+		url: "service.php?action=checkTetherStatus",
+		dataType : "json",
+		success: function(data){
+			$("#tetherStatus").html(data.tetherStatus);
+		},
+	});
+}
+
 $(document).on( "pageshow","#gallery", function( event ) {
 	$.ajax({
 		url: "service.php?action=getImages",
@@ -100,6 +110,7 @@ function updateGalleryGrid(data){
 
 $(document).on( 'pageinit',function(event){
 	getCamera();
+	checkTeherStatus();
 });
 
 function deleteFile(file){

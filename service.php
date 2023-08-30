@@ -40,7 +40,19 @@ try{
 			execInBackground ("pkill -f gphoto2");
 			echo json_encode(true);					
 			break;
-	
+
+		case "checkTetherStatus":
+				$returnObj = new TetherStatus();
+				exec("pgrep lighttpd", $pids);
+				if(empty($pids)) {			
+					$returnObj->status = "Tether Stopped";
+				} else {
+					$returnObj->status = "Tether Running";
+				}
+			
+				echo json_encode($returnObj);
+				break;
+		
 		case "takePicture":
 			exec ("gphoto2 --capture-image-and-download --filename \"./images/capture-%Y%m%d-%H%M%S-%03n.%C\"",$output);
 			echo json_encode(true);					
