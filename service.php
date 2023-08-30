@@ -27,6 +27,15 @@ function execInBackground($cmd) {
     }
 }
 
+function processRunning(string $process): bool
+{
+    if (empty(trim(shell_exec("pgrep $process")))) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
 $returnObj;
 
 try{
@@ -43,12 +52,11 @@ try{
 			break;
 
 		case "checkTetherStatus":
-				$returnObj = new TetherStatus();
-				exec("pgrep gphoto2", $pids);
-				if(empty($pids)) {			
-					$returnObj->status = "Tether Stopped";
-				} else {
+				$returnObj = new TetherStatus();				
+				if(processRunning("gphoto2")) {			
 					$returnObj->status = "Tether Running";
+				} else {
+					$returnObj->status = "Tether Stopped";
 				}
 			
 				echo json_encode($returnObj);
