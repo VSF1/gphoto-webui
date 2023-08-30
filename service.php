@@ -17,6 +17,14 @@ if (isset($_GET['action'])){
 	$action = $_GET['action'];
 }
 
+// Execute $cmd in the background
+function execInBackground($cmd) {
+    if (substr(php_uname(), 0, 7) == "Windows"){
+        pclose(popen("start /B ". $cmd, "r"));  
+    } else {
+        exec($cmd . " > /dev/null &");   
+    }
+}
 
 $returnObj;
 
@@ -24,12 +32,12 @@ try{
 	switch($action){
 
 		case "startTether":
-			exec ("gphoto2 --capture-tethered --keep --hook-script=\"./bin/tether_hook.sh\" --filename \"./images/capture-%Y%m%d-%H%M%S-%03n.%C\"",$output);
+			execInBackground ("gphoto2 --capture-tethered --keep --hook-script=\"./bin/tether_hook.sh\" --filename \"./images/capture-%Y%m%d-%H%M%S-%03n.%C\"");
 			echo json_encode(true);					
 			break;
 
 		case "stopTether":
-			exec ("pkill -f gphoto2",$output);
+			execInBackground ("pkill -f gphoto2");
 			echo json_encode(true);					
 			break;
 	
