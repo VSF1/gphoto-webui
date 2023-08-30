@@ -3,6 +3,7 @@
 <head>
 	<title>gphoto2 wrapper</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="refresh" content="5; URL=http://www.yourdomain.com/yoursite.html">
 	<link rel="stylesheet" href="css/jquery.mobile-1.4.2.css" />
 	<script src="js/jquery.js"></script>
 	<script src="js/jquery.mobile-1.4.2.js"></script>
@@ -22,7 +23,6 @@
 
 
 <div data-role="page" id="camera">
-
 	<div data-role="header">
 		<h1 id="cameraName"></h1>
 		<a href="#gallery" class="ui-btn-right ui-btn ui-btn-b ui-btn-inline ui-mini ui-corner-all ui-btn-icon-right ui-icon-grid">Gallery
@@ -32,9 +32,10 @@
 	<div role="main" class="ui-content" style="text-align:center">
 
 		<button onclick="takePicture()" id="snap"><img src="aperture.png"></button>
-		<button onclick="startTether()" id="snap">Start tether</button>
-		<button onclick="stopTether()" id="snap">Stop tether</button>
-		
+		<div>	
+			<button onclick="startTether()" id="snap">Start tether</button>
+			<button onclick="stopTether()" id="snap">Stop tether</button>
+		</div>
 	</div><!-- /content -->
 
 
