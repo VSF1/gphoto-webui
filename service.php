@@ -1,6 +1,7 @@
 <?php
 require_once("CameraRaw.php");
 require_once("Camera.php");
+require_once("ReturnFile.php");
 
 //time gphoto2 --quiet --capture-image-and-download --filename "./images/capture-%Y%m%d-%H%M%S-%03n.%C"
 //exec ("gphoto2 --set-config uilock=1",$output);
@@ -75,7 +76,7 @@ try{
 							$im->destroy();
 						}
 					}				
-					$returnFile;
+					$returnFile = new ReturnFile();
 					$returnFile->name = $path_parts['basename'];
 					$returnFile->sourcePath = 'images/'.$file;
 					$returnFile->thumbPath = 'images/thumbs/'.$path_parts['basename'].'.jpg';
