@@ -56,7 +56,7 @@ function checkTetherStatus() {
 		url: "service.php?action=checkTetherStatus",
 		dataType : "json",
 		success: function(data){
-			$("#tetherStatus").html(data.tetherStatus);
+			$("#tetherStatus").html(data.status);
 		},
 	});
 }
