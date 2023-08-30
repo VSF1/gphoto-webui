@@ -51,7 +51,7 @@ function stopTether(){
 	});
 }
 
-function checkTeherStatus() {
+function checkTetherStatus() {
 	$.ajax({
 		url: "service.php?action=checkTetherStatus",
 		dataType : "json",
