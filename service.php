@@ -1,7 +1,6 @@
 <?php
 require_once("CameraRaw.php");
-
-
+require_once("Camera.php");
 
 //time gphoto2 --quiet --capture-image-and-download --filename "./images/capture-%Y%m%d-%H%M%S-%03n.%C"
 //exec ("gphoto2 --set-config uilock=1",$output);
@@ -49,7 +48,7 @@ try{
 		
 		
 		case "getCamera":
-
+			returnObj = new Camera();
 			exec ("gphoto2 --auto-detect", $output);
 			$returnObj->camera = trim(explode("usb", $output[count($output) - 1])[0]);
 			header('Content-Type: application/json');
