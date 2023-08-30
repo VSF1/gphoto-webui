@@ -44,7 +44,7 @@ try{
 
 		case "checkTetherStatus":
 				$returnObj = new TetherStatus();
-				exec("pgrep lighttpd", $pids);
+				exec("pgrep gphoto2", $pids);
 				if(empty($pids)) {			
 					$returnObj->status = "Tether Stopped";
 				} else {
