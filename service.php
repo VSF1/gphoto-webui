@@ -23,6 +23,16 @@ $returnObj;
 try{
 	switch($action){
 
+		case "startTether":
+			exec ("gphoto2 --capture-tethered --keep --hook-script=\"./bin/tether_hook.sh\" --filename \"./images/capture-%Y%m%d-%H%M%S-%03n.%C\"",$output);
+			echo json_encode(true);					
+			break;
+
+		case "stopTether":
+			exec ("pkill -f gphoto2",$output);
+			echo json_encode(true);					
+			break;
+	
 		case "takePicture":
 			exec ("gphoto2 --capture-image-and-download --filename \"./images/capture-%Y%m%d-%H%M%S-%03n.%C\"",$output);
 			echo json_encode(true);					
