@@ -48,7 +48,7 @@ try{
 		
 		
 		case "getCamera":
-			returnObj = new Camera();
+			$returnObj = new Camera();
 			exec ("gphoto2 --auto-detect", $output);
 			$returnObj->camera = trim(explode("usb", $output[count($output) - 1])[0]);
 			header('Content-Type: application/json');
