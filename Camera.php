@@ -5,6 +5,6 @@
 * 
 */
 class Camera {
-	public string camera;
+	public string $camera;
 }
 ?>
