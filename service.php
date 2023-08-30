@@ -85,19 +85,24 @@ try{
 			fpassthru($fp);
 			exit;
 			break;
-		
-		
+
 		case "getCamera":
 			$returnObj = new Camera();
 			exec ("gphoto2 --auto-detect", $output);
 			$returnObj->camera = trim(explode("usb", $output[count($output) - 1])[0]);
 			header('Content-Type: application/json');
 			echo json_encode($returnObj);
-	
 			break;
-		
-		case "getImages":
-	
+			
+		case "getShutterCounter":
+			$returnObj = new Camera();
+			exec ("gphoto2 --get-config shuttercounter", $output);
+			$returnObj->shutterCounter = trim(explode("current", $output[count($output) - 1])[0]);
+			header('Content-Type: application/json');
+			echo json_encode($returnObj);
+			break;
+			
+		case "getImages":	
 			$files = array();
 			$imageDir = opendir('images');
 			while (($file = readdir($imageDir)) !== false) {			
