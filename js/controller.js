@@ -6,14 +6,12 @@ $(document).on( 'pageinit',function(event){
 
 
 function takePicture(){
-	
 	$.mobile.loading( 'show', {
 		text: 'Taking Image....',
 		textVisible: true,
 		theme: 'a'
 	});
          
-	
 	$.ajax({
 		url: "service.php?action=takePicture",
 		dataType : "json",
@@ -23,6 +21,35 @@ function takePicture(){
 	});
 }
 
+function startTether(){
+	$.mobile.loading( 'show', {
+		text: 'Starting tether....',
+		textVisible: true,
+		theme: 'a'
+	});         	
+	$.ajax({
+		url: "service.php?action=startTether",
+		dataType : "json",
+		success: function(data){
+			$.mobile.loading( 'hide');
+		},
+	});
+}
+
+function stopTether(){
+	$.mobile.loading( 'show', {
+		text: 'Stop tether....',
+		textVisible: true,
+		theme: 'a'
+	});         	
+	$.ajax({
+		url: "service.php?action=stopTether",
+		dataType : "json",
+		success: function(data){
+			$.mobile.loading( 'hide');
+		},
+	});
+}
 
 $(document).on( "pageshow","#gallery", function( event ) {
 	$.ajax({
