@@ -6,5 +6,6 @@
 */
 class Camera {
 	public string $camera;
+	public int $shutterCounter;
 }
 ?>
