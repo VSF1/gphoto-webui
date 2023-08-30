@@ -110,7 +110,7 @@ function updateGalleryGrid(data){
 
 $(document).on( 'pageinit',function(event){
 	getCamera();
-	checkTeherStatus();
+	checkTetherStatus();
 });
 
 function deleteFile(file){
