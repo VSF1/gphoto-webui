@@ -76,7 +76,7 @@ try{
 							$im->destroy();
 						}
 					}				
-					$returnFile = new ReturnFile();
+					$returnFile = new ReturnFile();<
 					$returnFile->name = $path_parts['basename'];
 					$returnFile->sourcePath = 'images/'.$file;
 					$returnFile->thumbPath = 'images/thumbs/'.$path_parts['basename'].'.jpg';
