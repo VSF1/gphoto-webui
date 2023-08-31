@@ -49,6 +49,7 @@ else
             ;;
         esac    
     done
+
     shift $((OPTIND -1))
     src=$1
     shift
@@ -81,8 +82,8 @@ fi
 ##################
 # SYNC SECTION
 ##################
-
+    
 while inotifywait -r -e modify,create,delete $src
 do  
-     rsync -avz $src/ $dst --delete --filter='P .git'
+    rsync -avz $src/ $dst --delete --filter='P .git'
 done
