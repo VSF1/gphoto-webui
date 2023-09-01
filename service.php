@@ -76,6 +76,7 @@ try{
 			echo json_encode(true);					
 			break;
 			
+		case "getFile":
 		case "getImage":	
 			$file = $_GET['file'];
 			header('Content-Type: application/octet-stream');
