@@ -109,7 +109,7 @@ try{
 					if(!is_dir('images/'.$file)){					
 						$path_parts = pathinfo('images/'.$file);
 						if($path_parts["extension"] != "md5") {
-							echo -e 'images/'.$file.'\n';
+							echo 'images/'.$file.'|';
 						}
 					}
 				}
