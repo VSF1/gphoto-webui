@@ -23,7 +23,7 @@ sudo apt-get upgrade
 
 3.) Install the following packages.
 
-sudo apt install imagemagick php php-cli php-imagick gphoto2 zip unzip exiv2
+sudo apt install imagemagick php php-cli php-imagick gphoto2 zip unzip exiv2 lftp rsync
 
 Note: You do not need a web server. In fact, I wouldn’t recommend it for this little app because this app will need more elevated permissions than the www-data user has. Configuring the server to run a user with elevated permissions might work, but not necessary. PHP has a built in development server that will work just fine and also run as the logged on user. 
 
@@ -35,7 +35,7 @@ Note: As of writing this, the gphoto2 package that comes with Raspian is a littl
 
 cd ~
 
-wget https://github.com/theonemule/gphoto-webui/archive/master.zip
+wget https://github.com/VSF1/gphoto-webui/archive/master.zip
 
 5.) Extract the files into a directory
 
