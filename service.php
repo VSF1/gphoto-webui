@@ -116,7 +116,7 @@ try{
 							} catch (Exception $e) { //else resize the image...
 								$im = new Imagick('images/'.$file);
 								$im->setImageFormat('jpg');
-								$im->scaleImage(1024,0);					
+								$im->scaleImage(400,0);					
 								$im->writeImage('images/thumbs/'.$path_parts['basename'].'jpg');
 								$im->clear();
 								$im->destroy();
