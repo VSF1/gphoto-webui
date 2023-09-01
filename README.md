@@ -35,11 +35,7 @@ Note: As of writing this, the gphoto2 package that comes with Raspian is a littl
 
 cd ~
 
-wget https://github.com/VSF1/gphoto-webui/archive/master.zip
-
-5.) Extract the files into a directory
-
-unzip master.zip
+wget https://github.com/VSF1/gphoto-webui/archive/master.zip -O master.zip && unzip -o master.zip
 
 6.) In the console, cd to that directory
 
