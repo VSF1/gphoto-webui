@@ -23,7 +23,7 @@ sudo apt-get upgrade
 
 3.) Install the following packages.
 
-sudo apt install imagemagick php php-cli php-imagick gphoto2 zip unzip exiv2 lftp rsync
+sudo apt install imagemagick php php-cli php-imagick gphoto2 zip unzip exiv2 lftp rsync inotify-tools
 
 Note: You do not need a web server. In fact, I wouldn’t recommend it for this little app because this app will need more elevated permissions than the www-data user has. Configuring the server to run a user with elevated permissions might work, but not necessary. PHP has a built in development server that will work just fine and also run as the logged on user. 
 
