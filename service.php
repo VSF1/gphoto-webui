@@ -102,7 +102,20 @@ try{
 			header('Content-Type: application/json');
 			echo json_encode($returnObj);
 			break;
-			
+		case "getImagesList":
+				$files = array();
+				$imageDir = opendir('images');
+				while (($file = readdir($imageDir)) !== false) {			
+					if(!is_dir('images/'.$file)){					
+						$path_parts = pathinfo('images/'.$file);
+						if($path_parts["extension"] != "md5") {
+							echo 'images/'.$file;
+						}
+					}
+				}
+				closedir($imageDir);
+				break;
+				
 		case "getImages":	
 			$files = array();
 			$imageDir = opendir('images');
