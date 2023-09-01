@@ -7,6 +7,7 @@ if [[ $ARGUMENT =~ .+\.[jpg|JPG] ]];then
   # shot the picture in the current geeqie open
   # cp $ARGUMENT latest.jpg
 #  /usr/bin/geeqie --remote "$ARGUMENT" &
+  md5sum "$ARGUMENT" > "$ARGUMENT.md5"
 fi
 
 if [[ $ARGUMENT =~ .+\.[arw|ARW|mrw|MRW] ]];then
@@ -16,5 +17,6 @@ if [[ $ARGUMENT =~ .+\.[arw|ARW|mrw|MRW] ]];then
   # shot the picture in the current geeqie open
   # cp $ARGUMENT latest.arw
 #  /usr/bin/geeqie --remote "$ARGUMENT" &
+  md5sum "$ARGUMENT" > "$ARGUMENT.md5"
 fi
  
