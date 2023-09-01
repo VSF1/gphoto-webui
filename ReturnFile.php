@@ -8,5 +8,6 @@ class ReturnFile {
 	public string $name;
 	public string $sourcePath;
 	public string $thumbPath;
+	public string $md5;
 }
 ?>

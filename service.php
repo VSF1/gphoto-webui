@@ -107,28 +107,30 @@ try{
 			$files = array();
 			$imageDir = opendir('images');
 			while (($file = readdir($imageDir)) !== false) {			
-				if(!is_dir('images/'.$file)){
+				if(!is_dir('images/'.$file)){					
 					$path_parts = pathinfo('images/'.$file);
-					if (!file_exists('images/thumbs/'.$path_parts['basename'].'.jpg')){
-						try { //try to extract the preview image from the RAW
-							CameraRaw::extractPreview('images/'.$file, 'images/thumbs/'.$path_parts['basename'].'.jpg');
-						} catch (Exception $e) { //else resize the image...
-							$im = new Imagick('images/'.$file);
-							$im->setImageFormat('jpg');
-							$im->scaleImage(1024,0);					
-							$im->writeImage('images/thumbs/'.$path_parts['basename'].'jpg');
-							$im->clear();
-							$im->destroy();
-						}
-					}				
-					$returnFile = new ReturnFile();
-					$returnFile->name = $path_parts['basename'];
-					$returnFile->sourcePath = 'images/'.$file;
-					$returnFile->thumbPath = 'images/thumbs/'.$path_parts['basename'].'.jpg';
-				
-					array_push($files,$returnFile);
-				
-					unset($returnFile);
+					if($path_parts["extension"] != "md5") {
+						if (!file_exists('images/thumbs/'.$path_parts['basename'].'.jpg')){
+							try { //try to extract the preview image from the RAW
+								CameraRaw::extractPreview('images/'.$file, 'images/thumbs/'.$path_parts['basename'].'.jpg');
+							} catch (Exception $e) { //else resize the image...
+								$im = new Imagick('images/'.$file);
+								$im->setImageFormat('jpg');
+								$im->scaleImage(1024,0);					
+								$im->writeImage('images/thumbs/'.$path_parts['basename'].'jpg');
+								$im->clear();
+								$im->destroy();
+							}
+						}				
+						$returnFile = new ReturnFile();
+						$returnFile->name = $path_parts['basename'];
+						$returnFile->sourcePath = 'images/'.$file;
+						$returnFile->thumbPath = 'images/thumbs/'.$path_parts['basename'].'.jpg';
+					
+						array_push($files,$returnFile);
+					
+						unset($returnFile);
+					}
 				}
 			}
 			closedir($imageDir);
