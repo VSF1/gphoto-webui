@@ -43,7 +43,7 @@ try{
 	switch($action){
 
 		case "startTether":
-			execInBackground ("gphoto2 --capture-tethered --keep --hook-script=\"./bin/tetherHook.sh\" --filename \"./images/capture-%Y%m%d-%H%M%S-%03n.%C\"");
+			execInBackground ("gphoto2 --capture-tethered --keep --hook-script=\"./bin/tether_hook.sh\" --filename \"./images/capture-%Y%m%d-%H%M%S-%03n.%C\"");
 			echo json_encode(true);					
 			break;
 
@@ -59,7 +59,7 @@ try{
 				} else {
 					$returnObj->status = "Tether Stopped";
 				}
-			
+				header('Content-Type: application/json');
 				echo json_encode($returnObj);
 				break;
 		
@@ -77,6 +77,7 @@ try{
 			echo json_encode(true);					
 			break;
 			
+		case "getFile":
 		case "getImage":	
 			$file = $_GET['file'];
 			header('Content-Type: application/octet-stream');
@@ -94,7 +95,7 @@ try{
 			header('Content-Type: application/json');
 			echo json_encode($returnObj);
 			break;
-			
+
 		case "getShutterCounter":
 			$returnObj = new Camera();
 			exec ("gphoto2 --get-config shuttercounter", $output);
@@ -102,37 +103,48 @@ try{
 			header('Content-Type: application/json');
 			echo json_encode($returnObj);
 			break;
-			
+		case "getImagesList":
+				$files = array();
+				$imageDir = opendir('images');
+				while (($file = readdir($imageDir)) !== false) {			
+					if(!is_dir('images/'.$file)){					
+						$path_parts = pathinfo('images/'.$file);
+						if($path_parts["extension"] != "md5") {
+							echo 'images/'.$file.'|';
+						}
+					}
+				}
+				closedir($imageDir);
+				break;
+				
 		case "getImages":	
 			$files = array();
 			$imageDir = opendir('images');
 			while (($file = readdir($imageDir)) !== false) {			
 				if(!is_dir('images/'.$file)){
-					$path_parts = pathinfo('images/'.$file);
-					if (CameraRaw::isImageFile($file)) {				
-						if (!file_exists('images/thumbs/'.$path_parts['basename'].'.jpg')){
-							try { //try to extract the preview image from the RAW
-								CameraRaw::extractPreview('images/'.$file, 'images/thumbs/'.$path_parts['basename'].'.jpg');
-							} catch (Exception $e) { //else resize the image...
-								$im = new Imagick('images/'.$file);
-								$im->setImageFormat('jpg');
-								$im->scaleImage(1024,0);					
-								$im->writeImage('images/thumbs/'.$path_parts['basename'].'jpg');
-								$im->clear();
-								$im->destroy();
-							}
-						}				
-						$returnFile = new ReturnFile();
-						$returnFile->name = $path_parts['basename'];
-						$returnFile->sourcePath = 'images/'.$file;
-						$returnFile->thumbPath = 'images/thumbs/'.$path_parts['basename'].'.jpg';
-						
-						array_push($files,$returnFile);	
-						unset($returnFile);
-					}
+					$path_parts = pathinfo('images/'.$file);				
+					if (!file_exists('images/thumbs/'.$path_parts['basename'].'.jpg')){
+						try { //try to extract the preview image from the RAW
+							CameraRaw::extractPreview('images/'.$file, 'images/thumbs/'.$path_parts['basename'].'.jpg');
+						} catch (Exception $e) { //else resize the image...
+							$im = new Imagick('images/'.$file);
+							$im->setImageFormat('jpg');
+							$im->scaleImage(1024,0);					
+							$im->writeImage('images/thumbs/'.$path_parts['basename'].'jpg');
+							$im->clear();
+							$im->destroy();
+						}
+					}				
+					$returnFile = new ReturnFile();
+					$returnFile->name = $path_parts['basename'];
+					$returnFile->sourcePath = 'images/'.$file;
+					$returnFile->thumbPath = 'images/thumbs/'.$path_parts['basename'].'.jpg';
+				
+					array_push($files,$returnFile);
+				
+					unset($returnFile);
 				}
 			}
-			
 			closedir($imageDir);
 			$returnObj = $files;
 			header('Content-Type: application/json');
