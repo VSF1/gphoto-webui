@@ -10,4 +10,4 @@ now=$(date +'%m-%d-%Y.%H.%M.%S')   # create now variable with date values
 pkill -f gphoto2
 pkill -f gphoto
 
-gphoto2 --capture-tethered --keep --hook-script=./bin/tether_hook.sh --filename "./images/$filenamepattern"
+gphoto2 --capture-tethered --keep --hook-script=./bin/tetherHook.sh --filename "./images/$filenamepattern"

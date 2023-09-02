@@ -1,5 +1,6 @@
 <?php
 require_once("CameraRaw.php");
+require_once("gPhoto2.php");
 require_once("Camera.php");
 require_once("ReturnFile.php");
 require_once("TetherStatus.php");
@@ -42,7 +43,7 @@ try{
 	switch($action){
 
 		case "startTether":
-			execInBackground ("gphoto2 --capture-tethered --keep --hook-script=\"./bin/tether_hook.sh\" --filename \"./images/capture-%Y%m%d-%H%M%S-%03n.%C\"");
+			execInBackground ("gphoto2 --capture-tethered --keep --hook-script=\"./bin/tetherHook.sh\" --filename \"./images/capture-%Y%m%d-%H%M%S-%03n.%C\"");
 			echo json_encode(true);					
 			break;
 
@@ -107,29 +108,31 @@ try{
 			$imageDir = opendir('images');
 			while (($file = readdir($imageDir)) !== false) {			
 				if(!is_dir('images/'.$file)){
-					$path_parts = pathinfo('images/'.$file);				
-					if (!file_exists('images/thumbs/'.$path_parts['basename'].'.jpg')){
-						try { //try to extract the preview image from the RAW
-							CameraRaw::extractPreview('images/'.$file, 'images/thumbs/'.$path_parts['basename'].'.jpg');
-						} catch (Exception $e) { //else resize the image...
-							$im = new Imagick('images/'.$file);
-							$im->setImageFormat('jpg');
-							$im->scaleImage(1024,0);					
-							$im->writeImage('images/thumbs/'.$path_parts['basename'].'jpg');
-							$im->clear();
-							$im->destroy();
-						}
-					}				
-					$returnFile = new ReturnFile();
-					$returnFile->name = $path_parts['basename'];
-					$returnFile->sourcePath = 'images/'.$file;
-					$returnFile->thumbPath = 'images/thumbs/'.$path_parts['basename'].'.jpg';
-				
-					array_push($files,$returnFile);
-				
-					unset($returnFile);
+					$path_parts = pathinfo('images/'.$file);
+					if (CameraRaw::isImageFile($file)) {				
+						if (!file_exists('images/thumbs/'.$path_parts['basename'].'.jpg')){
+							try { //try to extract the preview image from the RAW
+								CameraRaw::extractPreview('images/'.$file, 'images/thumbs/'.$path_parts['basename'].'.jpg');
+							} catch (Exception $e) { //else resize the image...
+								$im = new Imagick('images/'.$file);
+								$im->setImageFormat('jpg');
+								$im->scaleImage(1024,0);					
+								$im->writeImage('images/thumbs/'.$path_parts['basename'].'jpg');
+								$im->clear();
+								$im->destroy();
+							}
+						}				
+						$returnFile = new ReturnFile();
+						$returnFile->name = $path_parts['basename'];
+						$returnFile->sourcePath = 'images/'.$file;
+						$returnFile->thumbPath = 'images/thumbs/'.$path_parts['basename'].'.jpg';
+						
+						array_push($files,$returnFile);	
+						unset($returnFile);
+					}
 				}
 			}
+			
 			closedir($imageDir);
 			$returnObj = $files;
 			header('Content-Type: application/json');

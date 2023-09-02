@@ -16,7 +16,7 @@ class CameraRaw {
 	* @var	array	an array containing popular raw file format extensions
 	*/	
 	private static $rawExtensions = array('.ari','.arw','.bay','.crw','.cr2','.cap','.dcs','.dcr','.dng','.drf','.eip','.erf','.fff','.iiq','.k25','.kdc','.mdc','.mef','.mos','.mrw','.nef','.nrw','.obm','.orf','.pef','.ptx','.pxn','.r3d','.raf','.raw','.rwl','.rw2','.rwz','.sr2','.srf','.srw', '.x3f');
-	
+	private static $imgExtensions = array('.jpg', '.jpeg');
 	/**
 	* Checks if a file exists based on the filepath.
 	*
@@ -30,6 +30,24 @@ class CameraRaw {
 
 		return false;
 	}
+
+	/**
+	* Checks if a file is a raw file based on file extension.
+	*
+	* @param  	string	$filePath	the path to the file
+	* @return 	bool	returns true if the file is a raw type
+	*/
+	public static function isImageFile($filePath) {
+		$fileExtension = '.' . pathinfo($filePath, PATHINFO_EXTENSION);
+		if(in_array(strToLower($fileExtension), self::$rawExtensions)) {
+			return true;
+		} else if(in_array(strToLower($fileExtension), self::$imgExtensions)) {
+			return true;
+		}
+		
+		return false;
+	}
+
 
 	/**
 	* Checks if a file is a raw file based on file extension.
