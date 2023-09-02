@@ -37,13 +37,25 @@ function processRunning(string $process): bool
     }
 }
 
+function readMD5(string $file): string 
+{
+	$file_to_read = fopen($file, 'r');
+	if($file_to_read !== FALSE){
+    	while(($data = fgetcsv($file_to_read, 100, ',')) !== FALSE){
+        	return explode(" ", $data[0])[0];
+    	}    	
+    	fclose($file_to_read);
+	}
+	return ''; 
+}
+
 $returnObj;
 
 try{
 	switch($action){
 
 		case "startTether":
-			execInBackground ("gphoto2 --capture-tethered --keep --hook-script=\"./bin/tether_hook.sh\" --filename \"./images/capture-%Y%m%d-%H%M%S-%03n.%C\"");
+			execInBackground ("gphoto2 --capture-tethered --keep --hook-script=\"./bin/tetherHook.sh\" --filename \"./images/capture-%Y%m%d-%H%M%S-%03n.%C\"");
 			echo json_encode(true);					
 			break;
 
@@ -104,25 +116,46 @@ try{
 			echo json_encode($returnObj);
 			break;
 		case "getImagesList":
-				$files = array();
-				$imageDir = opendir('images');
-				while (($file = readdir($imageDir)) !== false) {			
-					if(!is_dir('images/'.$file)){					
-						$path_parts = pathinfo('images/'.$file);
-						if($path_parts["extension"] != "md5") {
-							echo 'images/'.$file.'|';
-						}
+			$imageDir = opendir('images');
+			while (($file = readdir($imageDir)) !== false) {			
+				if(!is_dir('images/'.$file)){			
+					if (!file_exists('images/'.$file.'.md5')) {
+						exec('md5sum images/'.$file.' > images/'.$file.'.md5');
+					}			
+					$path_parts = pathinfo('images/'.$file);
+					if($path_parts["extension"] != "md5") {
+						echo readMD5('images/'.$file.'.md5').' '.$file."\r\n";
 					}
 				}
-				closedir($imageDir);
-				break;
-				
+			}
+			closedir($imageDir);
+			break;
+		case "getFirstImageName":
+			$imageDir = opendir('images');
+			while (($file = readdir($imageDir)) !== false) {			
+				if(!is_dir('images/'.$file)){			
+					if (!file_exists('images/'.$file.'.md5')) {
+						exec('md5sum images/'.$file.' > images/'.$file.'.md5');
+					}			
+					$path_parts = pathinfo('images/'.$file);
+					if($path_parts["extension"] != "md5") {
+						echo readMD5('images/'.$file.'.md5').' '.$file."\r\n";
+						break;
+					}
+				}
+			}
+			closedir($imageDir);
+			break;
+					
 		case "getImages":	
 			$files = array();
 			$imageDir = opendir('images');
 			while (($file = readdir($imageDir)) !== false) {			
-				if(!is_dir('images/'.$file)){
-					$path_parts = pathinfo('images/'.$file);				
+				if(!is_dir('images/'.$file) && CameraRaw::isImageFile('images/'.$file)){
+					$path_parts = pathinfo('images/'.$file);
+					if (!file_exists('images/'.$file.'.md5')) {
+						exec('md5sum images/'.$file.' > images/'.$file.'.md5');
+					}				
 					if (!file_exists('images/thumbs/'.$path_parts['basename'].'.jpg')){
 						try { //try to extract the preview image from the RAW
 							CameraRaw::extractPreview('images/'.$file, 'images/thumbs/'.$path_parts['basename'].'.jpg');
@@ -139,7 +172,7 @@ try{
 					$returnFile->name = $path_parts['basename'];
 					$returnFile->sourcePath = 'images/'.$file;
 					$returnFile->thumbPath = 'images/thumbs/'.$path_parts['basename'].'.jpg';
-				
+					$returnFile->md5 = readMD5('images/'.$file.'.md5');
 					array_push($files,$returnFile);
 				
 					unset($returnFile);
