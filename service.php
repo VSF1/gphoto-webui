@@ -120,7 +120,7 @@ try{
 
 		case "getBateryLevel":
 			$returnObj = new Camera();
-			exec ("gphoto2 --get-config baterylevel", $output);				
+			exec ("gphoto2 --get-config batterylevel", $output);				
 			$returnObj->bateryLevel = trim(explode("Current", $output[count($output) - 1])[0]);
 			header('Content-Type: application/json');
 			echo json_encode($returnObj);
