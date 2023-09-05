@@ -113,15 +113,15 @@ try{
 		case "getSerialNumber":
 			$returnObj = new Camera();
 			exec ("gphoto2 --get-config serialnumber", $output);				
-			$returnObj->serialNumber = trim(explode("Current", $output[count($output) - 1])[0]);
+			$returnObj->serialNumber = trim(explode("Current:", $output[count($output) - 2])[1]);
 			header('Content-Type: application/json');
 			echo json_encode($returnObj);
 			break;
 
-		case "getBateryLevel":
+		case "getBatteryLevel":
 			$returnObj = new Camera();
 			exec ("gphoto2 --get-config batterylevel", $output);				
-			$returnObj->bateryLevel = trim(explode("Current", $output[count($output) - 1])[0]);
+			$returnObj->batteryLevel = trim(explode("Current", $output[count($output) - 2])[1]);
 			header('Content-Type: application/json');
 			echo json_encode($returnObj);
 			break;
@@ -129,7 +129,7 @@ try{
 		case "getShutterCounter":
 			$returnObj = new Camera();
 			exec ("gphoto2 --get-config shuttercounter", $output);
-			$returnObj->shutterCounter = trim(explode("current", $output[count($output) - 1])[0]);
+			$returnObj->shutterCounter = trim(explode("current", $output[count($output) - 2])[1]);
 			header('Content-Type: application/json');
 			echo json_encode($returnObj);
 			break;
