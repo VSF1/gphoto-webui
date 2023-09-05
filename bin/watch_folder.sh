@@ -111,7 +111,7 @@ else
   echo "darktable doesn't seem to support Lua, loading images directly. This results in better error handling but might interrupt the workflow"
 fi
 
-"${INOTIFYWAIT}" --monitor "${BASE_FOLDER}" --event close_write --excludei ".*\.xmp$" |
+"${INOTIFYWAIT}" --monitor "${BASE_FOLDER}" --event "moved_to" --exclude ".*\.xmp$" |
   while read -r path event file; do
     if [ ${HAVE_LUA} -eq 0 ]; then
       echo "'${file}' added"

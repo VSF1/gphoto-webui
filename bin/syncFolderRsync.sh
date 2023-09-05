@@ -25,7 +25,7 @@ bold=$(tput bold)
 normal=$(tput sgr0)
 
 src=""
-dst=""
+dst="$2"
 
 ##################
 # OPTIONS SECTION
@@ -79,11 +79,20 @@ else
 shift $((OPTIND -1))
 fi
 
+#sudo sshfs -o allow_other,default_permissions vitor@tetherpi:~/gphoto-webui-master/images/ $src
+
 ##################
 # SYNC SECTION
 ##################
-    
-while inotifywait -r -e modify,create,delete $src
+echo "Watching $src and $dst"    
+# while inotifywait -r -e modify,create,delete $src
+while : 
 do  
-    rsync -avz $src/ $dst --delete --filter='P .git'
+    SECONDS=0
+    rsync -aWq $src $dst --no-compress --progress --remove-source-files --filter='P .git' --filter='- *.md5' --filter='- thumbs' --filter='~*'
+    elapsed=$SECONDS
+    if [ "$elapsed" -ge 4 ]; then 
+        echo "transfer took $elapsed seconds"
+    fi
+    sleep 2
 done

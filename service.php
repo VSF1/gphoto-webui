@@ -108,6 +108,22 @@ try{
 			echo json_encode($returnObj);
 			break;
 
+		case "getSerialNumber":
+			$returnObj = new Camera();
+			exec ("gphoto2 --get-config serialnumber", $output);				
+			$returnObj->serialNumber = trim(explode("current", $output[count($output) - 1])[0]);
+			header('Content-Type: application/json');
+			echo json_encode($returnObj);
+			break;
+
+		case "getBateryLevel":
+			$returnObj = new Camera();
+			exec ("gphoto2 --get-config baterylevel", $output);				
+			$returnObj->bateryLevel = trim(explode("current", $output[count($output) - 1])[0]);
+			header('Content-Type: application/json');
+			echo json_encode($returnObj);
+			break;
+	
 		case "getShutterCounter":
 			$returnObj = new Camera();
 			exec ("gphoto2 --get-config shuttercounter", $output);
@@ -162,7 +178,7 @@ try{
 						} catch (Exception $e) { //else resize the image...
 							$im = new Imagick('images/'.$file);
 							$im->setImageFormat('jpg');
-							$im->scaleImage(1024,0);					
+							$im->scaleImage(400,0);					
 							$im->writeImage('images/thumbs/'.$path_parts['basename'].'jpg');
 							$im->clear();
 							$im->destroy();

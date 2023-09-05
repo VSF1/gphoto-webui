@@ -1,22 +1,25 @@
 #!/bin/bash
+$FILENAME=${ARGUMENT::-1}
 # for every pic taken
-if [[ $ARGUMENT =~ .+\.[jpg|JPG] ]];then
+if [[ $FILENAME =~ .+\.[jpg|JPG] ]];then
   #if [ *$ACTION* = *Saving* ]; then
   # do a echo of the file name
-  echo "Download: $ARGUMENT"
+  echo "Download: $FILENAME"
   # shot the picture in the current geeqie open
   # cp $ARGUMENT latest.jpg
 #  /usr/bin/geeqie --remote "$ARGUMENT" &
-  md5sum "$ARGUMENT" > "$ARGUMENT.md5"
+  mv "$ARGUMENT" "$FILENAME"
+  md5sum "$FILENAME" > "$FILENAME.md5"
 fi
 
-if [[ $ARGUMENT =~ .+\.[arw|ARW|mrw|MRW] ]];then
+if [[ $FILENAME =~ .+\.[arw|ARW|mrw|MRW] ]];then
   #if [ *$ACTION* = *Saving* ]; then
   # do a echo of the file name
-  echo "Download: $ARGUMENT"
+  echo "Download: $FILENAME"
   # shot the picture in the current geeqie open
   # cp $ARGUMENT latest.arw
 #  /usr/bin/geeqie --remote "$ARGUMENT" &
-  md5sum "$ARGUMENT" > "$ARGUMENT.md5"
+  mv "$ARGUMENT" "$FILENAME"
+  md5sum "$FILENAME" > "$FILENAME.md5"
 fi
  
