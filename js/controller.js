@@ -111,6 +111,7 @@ function updateGalleryGrid(data){
 $(document).on( 'pageinit',function(event){
 	getCamera();
 	getBatteryLevel();
+	getSerialNumber();
 	checkTetherStatus();
 });
 
@@ -159,7 +160,7 @@ function getBatteryLevel(){
 		url: "service.php?action=getBatteryLevel",
 		dataType : "json",
 		success: function(data){
-			$("#batteryLevel").html(data.bateryLevel);
+			$("#batteryLevel").html(data.batteryLevel);
 		},
 	});
 }

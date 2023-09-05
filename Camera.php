@@ -8,6 +8,6 @@ class Camera {
 	public string $camera;
 	public int $shutterCounter;
 	public string $serialNumber;
-	public string $bateryLevel;
+	public string $batteryLevel;
 }
 ?>
