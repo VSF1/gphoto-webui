@@ -60,7 +60,9 @@ try{
 			break;
 
 		case "stopTether":
-			execInBackground ("pkill -f gphoto2");
+			if(processRunning("gphoto2")) {
+				execInBackground ("pkill -f gphoto2");
+			}
 			echo json_encode(true);					
 			break;
 

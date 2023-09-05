@@ -110,6 +110,7 @@ function updateGalleryGrid(data){
 
 $(document).on( 'pageinit',function(event){
 	getCamera();
+	getBatteryLevel();
 	checkTetherStatus();
 });
 
@@ -139,6 +140,26 @@ function getCamera(){
 		dataType : "json",
 		success: function(data){
 			$("#cameraName").html(data.camera);
+		},
+	});
+}
+
+function getSerialNumber(){
+	$.ajax({
+		url: "service.php?action=getSerialNumber",
+		dataType : "json",
+		success: function(data){
+			$("#serialNumber").html(data.serialNumber);
+		},
+	});
+}
+
+function getBatteryLevel(){
+	$.ajax({
+		url: "service.php?action=getBatteryLevel",
+		dataType : "json",
+		success: function(data){
+			$("#batteryLevel").html(data.bateryLevel);
 		},
 	});
 }

@@ -79,20 +79,26 @@ else
 shift $((OPTIND -1))
 fi
 
-#sudo sshfs -o allow_other,default_permissions vitor@tetherpi:~/gphoto-webui-master/images/ $src
-
 ##################
 # SYNC SECTION
 ##################
-echo "Watching $src and $dst"    
-# while inotifywait -r -e modify,create,delete $src
+echo "Watching $src and $dst"  
 while : 
 do  
     SECONDS=0
-    rsync -aWq $src $dst --no-compress --progress --remove-source-files --filter='P .git' --filter='- *.md5' --filter='- thumbs' --filter='~*'
+    #filesL=$(rsync -nr $src --filter='P .git' --filter='- *.md5' --filter='- thumbs' --filter='- *.tmp' --filter='- .' | awk '{ $1=$2=$3=$4=""; print substr($0,5); }')
+    #files=($filesL)
+    #echo "${files[@]}"
+    #if [ ${#files[@]} -ge 2 ]; then
+    #    echo "copying $src/${files[1]}" 
+    #	rsync -atq $src/${files[1]} $dst --stop-after=1 --partial --timeout=10 --contimeout=10 --no-compress --progress --remove-source-files --filter='P .git' --filter='- *.md5' --filter='- thumbs' --filter='- *.tmp'
+    #fi
+    rsync -atv $src $dst --stop-after=1 --whole-file --timeout=10 --contimeout=10 --no-compress --progress --remove-source-files --filter='P .git' --filter='- *.md5' --filter='- thumbs' --filter='- *.tmp'
     elapsed=$SECONDS
     if [ "$elapsed" -ge 4 ]; then 
         echo "transfer took $elapsed seconds"
+	sleep 1
+    else
+	sleep 5
     fi
-    sleep 2
 done
