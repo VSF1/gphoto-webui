@@ -1,5 +1,5 @@
 #!/bin/bash
-$FILENAME=${ARGUMENT::-1}
+$FILENAME=${ARGUMENT::-4}
 # for every pic taken
 if [[ $FILENAME =~ .+\.[jpg|JPG] ]];then
   #if [ *$ACTION* = *Saving* ]; then

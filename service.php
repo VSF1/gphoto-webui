@@ -76,7 +76,7 @@ try{
 				break;
 		
 		case "takePicture":
-			exec ("gphoto2 --capture-image-and-download --filename \"./images/capture-%Y%m%d-%H%M%S-%03n.%C\"",$output);
+			exec ("gphoto2 --capture-image-and-download --filename \"./images/capture-%Y%m%d-%H%M%S-%03n.%C.tmp\"",$output);
 			echo json_encode(true);					
 			break;
 	
