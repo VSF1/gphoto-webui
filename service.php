@@ -14,9 +14,14 @@ require_once("TetherStatus.php");
 //echo join("\n",$output);
 
 $action = '';
+$port = '';
 
 if (isset($_GET['action'])){
 	$action = $_GET['action'];
+}
+
+if (isset($_GET['port'])){
+	$port = "usb:". $_GET['port'];
 }
 
 // Execute $cmd in the background
@@ -103,13 +108,24 @@ try{
 			break;
 
 		case "getCamera":
-			$returnObj = new Camera();
-			exec ("gphoto2 --auto-detect", $output);
-			$returnObj->camera = trim(explode("usb", $output[count($output) - 1])[0]);
+			$returnObj = Cameras::getCameras()->cameras[0];
+			if(!isset($returnObj)) {
+				$camera = new Camera();
+				$camera->camera = 'no camera found';
+				$camera->serialNumber = '';
+				$camera->batteryLevel = '';				
+			}
+			$returnObj=$camera;
 			header('Content-Type: application/json');
 			echo json_encode($returnObj);
 			break;
 
+		case "getCameras":
+			    $returnObj = Cameras::getCameras();
+				header('Content-Type: application/json');
+				echo json_encode($returnObj);
+				break;
+	
 		case "getSerialNumber":
 			$returnObj = new Camera();
 			exec ("gphoto2 --get-config serialnumber", $output);				
@@ -121,7 +137,7 @@ try{
 		case "getBatteryLevel":
 			$returnObj = new Camera();
 			exec ("gphoto2 --get-config batterylevel", $output);				
-			$returnObj->batteryLevel = trim(explode("Current", $output[count($output) - 2])[1]);
+			$returnObj->batteryLevel = trim(explode("Current:", $output[count($output) - 2])[1]);
 			header('Content-Type: application/json');
 			echo json_encode($returnObj);
 			break;
@@ -129,7 +145,7 @@ try{
 		case "getShutterCounter":
 			$returnObj = new Camera();
 			exec ("gphoto2 --get-config shuttercounter", $output);
-			$returnObj->shutterCounter = trim(explode("current", $output[count($output) - 2])[1]);
+			$returnObj->shutterCounter = trim(explode("Current:", $output[count($output) - 2])[1]);
 			header('Content-Type: application/json');
 			echo json_encode($returnObj);
 			break;

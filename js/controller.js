@@ -1,9 +1,6 @@
 //var galleryImages;
-
-$(document).on( 'pageinit',function(event){
-	getCamera();
-});
-
+var cameraView=false;
+var galleryView=false;
 
 function takePicture(){
 	$.mobile.loading( 'show', {
@@ -51,44 +48,36 @@ function stopTether(){
 	});
 }
 
-function checkTetherStatus() {
-	$.ajax({
-		url: "service.php?action=checkTetherStatus",
-		dataType : "json",
-		success: function(data){
-			$("#tetherStatus").html(data.status);
-		},
-	});
+function checkCameraStatus() {
+	if (cameraView) {
+		getCamera();
+		setTimeout(checkCameraStatus, 10000);
+	} 
 }
 
-$(document).on( "pageshow","#gallery", function( event ) {
-	$.ajax({
-		url: "service.php?action=getImages",
-		dataType : "json",
-		success: function(data){
-			updateGalleryGrid(data);
-		},
-	});
-})
-
+function checkTetherStatus() {
+	if (cameraView) {
+		setTimeout(checkTetherStatus, 5000);
+		$.ajax({
+			url: "service.php?action=checkTetherStatus",
+			dataType : "json",
+			success: function(data){
+				$("#tetherStatus").html(data.status);
+			},
+		});
+	}
+}
 
 function updateGalleryGrid(data){
 	//$("#galleryGrid").html("");
-	
-	var galleryHTML = "";
-	
+	var galleryHTML = "";	
 	for(var i = 0; i < data.length; i++){
-	
-	
-	
 		var uiClass = "a";
-		
 		if (i % 2 == 1){
 			uiClass = "b";
 		} 
-	
-		var image = data[i];
 
+		var image = data[i];
 		var id = image.name.replace(/[-\.]/g,'');
 
 		if ($('#' + id).length	> 0){
@@ -103,20 +92,24 @@ function updateGalleryGrid(data){
 			galleryTemplate = galleryTemplate.replace(/@imageName/g, image.name);	
 			galleryTemplate = galleryTemplate.replace(/@id/g, id);	
 			$("#galleryGrid").append(galleryTemplate);
-
 		}
 	}
 }
 
-$(document).on( 'pageinit',function(event){
-	getCamera();
-	getBatteryLevel();
-	getSerialNumber();
-	checkTetherStatus();
-});
+function checkTetherTransfer() {
+	if (galleryView) {
+		$.ajax({
+			url: "service.php?action=getImages",
+			dataType : "json",
+			success: function(data){
+				updateGalleryGrid(data);
+			},
+		});
+		setTimeout(checkTetherTransfer, 10000);
+	}
+}
 
 function deleteFile(file){
-
 	var id = file.replace(/[-\.]/g,'');
 	$('#' + id).remove();
 
@@ -140,7 +133,17 @@ function getCamera(){
 		url: "service.php?action=getCamera",
 		dataType : "json",
 		success: function(data){
-			$("#cameraName").html(data.camera);
+			$("#cameraInfo").html(data.camera + ' | SN:' + data.serialNumber + ' | Bat:' + data.batteryLevel);
+		},
+	});
+}
+
+function getCameras(){
+	$.ajax({
+		url: "service.php?action=getCameras",
+		dataType : "json",
+		success: function(data){
+			$("#cameraName").html(data.cameras);
 		},
 	});
 }
@@ -163,4 +166,28 @@ function getBatteryLevel(){
 			$("#batteryLevel").html(data.batteryLevel);
 		},
 	});
-}
+};
+
+$(document).on( "pageshow","#gallery", function( event ) {
+	galleryView = true;
+	checkTetherTransfer();
+});
+
+$(document).on( "pagehide","#gallery", function( event ) {
+	galleryView = false;
+});
+
+$(document).on( "pageshow","#camera", function( event ) {
+	cameraView = true;
+	checkCameraStatus();
+	checkTetherStatus();
+});
+
+$(document).on( "pagehide","#camera", function( event ) {
+	cameraView = false;
+});
+
+$(document).on( 'pageinit',function(event){
+	//checkCameraStatus();
+	//checkTetherStatus();
+});
