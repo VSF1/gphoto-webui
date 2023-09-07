@@ -108,8 +108,8 @@ try{
 			break;
 
 		case "getCamera":
-			$returnObj = Cameras::getCameras()->cameras[0];
-			if(!isset($returnObj)) {
+			$camera = Cameras::getCameras()->cameras[0];
+			if(!isset($camera)) {
 				$camera = new Camera();
 				$camera->camera = 'no camera found';
 				$camera->serialNumber = '';
