@@ -20,31 +20,36 @@ class Camera {
 		$port = $this->port;
 		exec ("gphoto2 --get-config serialnumber --port " . $port, $output);
 		try {
-			$this->serialNumber = ltrim(trim(explode("Current:", $output[count($output) - 2])[1]),"0");
+			$e=explode("Current:", $output[count($output) - 2]);
+			if (isset($e[1])) $this->serialNumber = ltrim(trim($e[1]),"0");
 		} catch (Exception $e) {
 		}
 	
 		exec ("gphoto2 --get-config shuttercounter --port " . $port, $output);
 		try {
-			$this->shutterCounter = trim(explode("Current:", $output[count($output) - 2])[1]);
+			$e=explode("Current:", $output[count($output) - 2]);
+			if (isset($e[1])) $this->shutterCounter = trim($e[1]);
 		} catch (Exception $e) {
 		}
 		
 		exec ("gphoto2 --get-config batterylevel --port " . $port, $output);				
 		try {
-			$this->batteryLevel = trim(explode("Current:", $output[count($output) - 2])[1]);
+			$e=explode("Current:", $output[count($output) - 2]);
+			if (isset($e[1])) $this->batteryLevel = trim($e[1]);
 		} catch (Exception $e) {
 		}
 
 		exec ("gphoto2 --get-config cameramodel --port " . $port, $output);
 		try {
-			$this->cameraModel = ltrim(trim(explode("Current:", $output[count($output) - 2])[1]),"0");
+			$e=explode("Current:", $output[count($output) - 2]);
+			if (isset($e[1])) $this->cameraModel = trim($e[1]);
 		} catch (Exception $e) {
 		}
 
 		exec ("gphoto2 --get-config manufacturer --port " . $port, $output);
 		try {
-			$this->manufacturer = ltrim(trim(explode("Current:", $output[count($output) - 2])[1]),"0");
+			$e=explode("Current:", $output[count($output) - 2]);
+			if (isset($e[1])) $this->manufacturer = trim($e[1]);
 		} catch (Exception $e) {
 		}
 

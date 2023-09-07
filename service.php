@@ -108,12 +108,15 @@ try{
 			break;
 
 		case "getCamera":
-			$camera = Cameras::getCameras()->cameras[0];
-			if(!isset($camera)) {
+			$cameras = Cameras::getCameras()->cameras;
+			if(!isset($cameras) || !isset($cameras[0])) {
 				$camera = new Camera();
 				$camera->camera = 'no camera found';
 				$camera->serialNumber = '';
 				$camera->batteryLevel = '';				
+			}
+			else {
+				$camera=$cameras[0];
 			}
 			$returnObj=$camera;
 			header('Content-Type: application/json');
