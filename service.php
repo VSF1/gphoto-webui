@@ -201,7 +201,7 @@ try{
 					if (!file_exists('images/fs/'.$path_parts['basename'].'.jpg')){
 						// create a full size version
 						try { 
-							CameraRaw::generateImageJPG('images/'.$file, 'images/fs/'.$path_parts['basename'].'.jpg');
+						//	CameraRaw::generateImageJPG('images/'.$file, 'images/fs/'.$path_parts['basename'].'.jpg');
 						} catch (Exception $e) {
 							echo get_current_user() . '    ';
 							echo $e;
