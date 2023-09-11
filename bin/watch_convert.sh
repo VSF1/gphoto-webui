@@ -86,6 +86,7 @@ fi
 "${INOTIFYWAIT}" --monitor "${BASE_FOLDER}" --event "create, move_to" --exclude ".*\.xmp$" |
   while read -r path event file; do
       echo "${event} '${file}' added, generating full size and thumbs"
-      $(gm convert -quality 60 images/$file images/fs/$file.jpg)
-      $(gm convert -quality 60 images/fs/$file images/thumbs/$file.jpg)
+      outputfile=$(basename $file)
+      $(gm convert -quality 60 images/$file images/fs/$outputfile.jpg)
+      $(gm convert -quality 60 images/fs/$file images/thumbs/$outputfile.jpg)
   done
