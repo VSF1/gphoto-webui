@@ -95,16 +95,17 @@ class CameraRaw {
 	*
 	* @return void.
 	*/
-	public static function generateImage($sourceFilePath, $targetFilePath, $width, $height, $quality = 60) {
+	public static function generateImageJPG($sourceFilePath, $targetFilePath, $width = -1, $height = -1, $quality = 60) {
 		if(!self::checkFile($sourceFilePath)) {
 			throw new \InvalidArgumentException('Incorrect filepath given');
 		}
 
-		$im = new \Imagick($sourceFilePath);
+		$im = new \Gmagick($sourceFilePath);
 		$im->setImageFormat('jpg');
-		$im->setImageCompressionQuality($quality); 
-    		$im->stripImage(); 
-		$im->thumbnailImage($width, $height, true);
+		$im->setCompressionQuality($quality); 
+    	$im->stripImage(); 
+		if ($width > -1 || $height > -1)
+			$im->thumbnailImage($width, $height, true);
 		$im->writeImage($targetFilePath);
 		$im->clear();
 		$im->destroy();

@@ -99,6 +99,6 @@ do
         echo "transfer took $elapsed seconds"
 	sleep 1
     else
-	sleep 5
+	sleep 6
     fi
 done

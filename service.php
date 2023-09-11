@@ -1,4 +1,9 @@
 <?php
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 require_once("CameraRaw.php");
 require_once("gPhoto2.php");
 require_once("Camera.php");
@@ -83,7 +88,7 @@ try{
 				break;
 		
 		case "takePicture":
-			exec ("gphoto2 --capture-image-and-download --filename \"./images/capture-%Y%m%d-%H%M%S-%03n.%C.tmp\"",$output);
+			exec ("gphoto2 --capture-image-and-download --filename \"./images/capture-%Y%m%d-%H%M%S-%03n.%C\"",$output);
 			echo json_encode(true);					
 			break;
 	
@@ -192,15 +197,25 @@ try{
 					$path_parts = pathinfo('images/'.$file);
 					if (!file_exists('images/'.$file.'.md5')) {
 						exec('md5sum images/'.$file.' > images/'.$file.'.md5');
+					}
+					if (!file_exists('images/fs/'.$path_parts['basename'].'.jpg')){
+						// create a full size version
+						try { 
+							CameraRaw::generateImageJPG('images/'.$file, 'images/fs/'.$path_parts['basename'].'.jpg');
+						} catch (Exception $e) {
+							echo get_current_user() . '    ';
+							echo $e;
+							die;
+						}
 					}				
 					if (!file_exists('images/thumbs/'.$path_parts['basename'].'.jpg')){
 						try { //try to extract the preview image from the RAW
 							CameraRaw::extractPreview('images/'.$file, 'images/thumbs/'.$path_parts['basename'].'.jpg');
 						} catch (Exception $e) { //else resize the image...
-							$im = new Imagick('images/'.$file);
+							$im = new \Gmagick('images/'.$file);
 							$im->setImageFormat('jpg');
 							$im->scaleImage(400,0);					
-							$im->writeImage('images/thumbs/'.$path_parts['basename'].'jpg');
+							$im->writeImage('images/thumbs/'.$path_parts['basename'].'.jpg');
 							$im->clear();
 							$im->destroy();
 						}
