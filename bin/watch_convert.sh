@@ -102,10 +102,16 @@ fi
   while read -r path event srcFile; do
       msg "Event '${event}' for '${srcFile}'"
       SECONDS=0
+      srcExtension="${srcFile##*.}"
       srcFullPath="${path}${srcFile}"
       dstFile=${srcFile%.*}
       dstFile=${dstFile##*/}
       dstFullPath="${path}thumbs/${dstFile}.jpg"
+
+      if [ "$srcExtension" -eq "md5" ] ; then
+        // skip
+        continue;
+      fi
 
       msg "Extracting thumb images from raw ${srcFullPath}"
       exiv2 -pp $srcFullPath | while read -r preview_asc thumb_id format sizepx pixels sizeb bytes_asc; do
