@@ -1,14 +1,18 @@
 <?php
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+//ini_set('display_errors', 1);
+//ini_set('display_startup_errors', 1);
+//error_reporting(E_ALL);
 
 require_once("CameraRaw.php");
 require_once("gPhoto2.php");
 require_once("Camera.php");
 require_once("ReturnFile.php");
 require_once("TetherStatus.php");
+require_once("IniFile.php");
+
+// read setup
+$config = IniFile::read("cfg/config.ini");
 
 //time gphoto2 --quiet --capture-image-and-download --filename "./images/capture-%Y%m%d-%H%M%S-%03n.%C"
 //exec ("gphoto2 --set-config uilock=1",$output);
@@ -195,13 +199,14 @@ try{
 			while (($file = readdir($imageDir)) !== false) {			
 				if(!is_dir('images/'.$file) && CameraRaw::isImageFile('images/'.$file)){
 					$path_parts = pathinfo('images/'.$file);
+					/*										
 					if (!file_exists('images/'.$file.'.md5')) {
 						exec('md5sum images/'.$file.' > images/'.$file.'.md5');
 					}
 					if (!file_exists('images/fs/'.$path_parts['basename'].'.jpg')){
 						// create a full size version
 						try { 
-						//	CameraRaw::generateImageJPG('images/'.$file, 'images/fs/'.$path_parts['basename'].'.jpg');
+							CameraRaw::generateImageJPG('images/'.$file, 'images/fs/'.$path_parts['basename'].'.jpg');
 						} catch (Exception $e) {
 							echo get_current_user() . '    ';
 							echo $e;
@@ -219,12 +224,12 @@ try{
 							$im->clear();
 							$im->destroy();
 						}
-					}				
+					}*/				
 					$returnFile = new ReturnFile();
 					$returnFile->name = $path_parts['basename'];
 					$returnFile->sourcePath = 'images/'.$file;
-					$returnFile->thumbPath = 'images/thumbs/'.$path_parts['basename'].'.jpg';
-					$returnFile->md5 = readMD5('images/'.$file.'.md5');
+					$returnFile->thumbPath = 'images/thumbs/'.$path_parts['filename'].'.jpg';
+					//$returnFile->md5 = readMD5('images/'.$file.'.md5');
 					array_push($files,$returnFile);
 				
 					unset($returnFile);

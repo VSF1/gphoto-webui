@@ -22,6 +22,41 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+PIDFILE=/var/run/whatch_convert.pid
+
+if [ -f $PIDFILE ]
+then
+  PID=$(cat $PIDFILE)
+  ps -p $PID > /dev/null 2>&1
+  if [ $? -eq 0 ]
+  then
+    echo "Process already running"
+    exit 1
+  else
+    ## Process not found assume not running
+    echo $$ > $PIDFILE
+    if [ $? -ne 0 ]
+    then
+      echo "Could not create PID file"
+      exit 1
+    fi
+  fi
+else
+  echo $$ > $PIDFILE
+  if [ $? -ne 0 ]
+  then
+    echo "Could not create PID file"
+    exit 1
+  fi
+fi
+
+cleanup() {
+  rm $PIDFILE
+}
+
+trap cleanup INT
+trap "echo; echo clean up done. bye" EXIT
+
 . "$(dirname "$0")/common.sh"
 
 hiResImages=0
@@ -106,38 +141,58 @@ fi
       srcFullPath="${path}${srcFile}"
       dstFile=${srcFile%.*}
       dstFile=${dstFile##*/}
-      dstFullPath="${path}thumbs/${dstFile}.jpg"
+      dstFullPath="${path}fs/${dstFile}.jpg"
 
-      if [ "$srcExtension" -eq "md5" ] ; then
-        // skip
-        continue;
+      if [ "$srcExtension" = "md5" ] ; then
+        msg "Ignoring file"
+        continue
       fi
 
-      msg "Extracting thumb images from raw ${srcFullPath}"
-      exiv2 -pp $srcFullPath | while read -r preview_asc thumb_id format sizepx pixels sizeb bytes_asc; do
-        thumb_id="$(cut -d':' -f1 <<< "$thumb_id")"
-        thumb_w="$(cut -d'x' -f1 <<< "$sizepx")"
-        thumb_h="$(cut -d'x' -f2 <<< "$sizepx")"
-        dstTempFullPath=/tmp/$dstFile-preview$thumb_id.jpg
+      msg "Extracting thumb images from raw ${srcFullPath}"      
+      img_fullsize_id=-1      
+      while read -r preview_asc thumb_id format sizepx pixels sizeb bytes_asc; do
+        img_fullsize_id="$(cut -d':' -f1 <<< "$thumb_id")"
+        msg "Found thumb image nº$img_fullsize_id size $sizepx"
+      done <<< $(exiv2 -pp $srcFullPath)
+
+      if [ "$img_fullsize_id" -ge 0 ]; then 
+        dstTempFullPath="/tmp/$dstFile-preview$img_fullsize_id.jpg"
         if [ -f "$dstTempFullPath" ]; then
           echo "Deleting ${dstTempFullPath}" 
           rm $dstTempFullPath
         fi 
-        echo "Extracting thumb image nº${thumb_id} size ${sizepx}"
-        exiv2 -ep$thumb_id -l /tmp $srcFullPath
+        echo "Extracting thumb image nº${img_fullsize_id}"
+        exiv2 -ep$img_fullsize_id -l /tmp $srcFullPath
         mv $dstTempFullPath $dstFullPath 
-      done
+        chmod a+rw $dstFullPath 
+      fi
       echo "Extraction took $SECONDS seconds."
 
+      SECONDS=0
+      
       if [ "$hiResImages" -eq 1 ]; then     
-        msg "Generating high quality jpeg image"
-        SECONDS=0
+        msg "Generating high quality jpeg image"        
+        thumbFullPath="${path}thumbs/${dstFile}.jpg"
         dstFullPath="${path}fs/${dstFile}.jpg"
         if [ -f "$dstFullPath" ]; then
-          rm $dstFullPath
+          if [ -f "$thumbFullPath" ]; then
+            rm $thumbFullPath
+          fi
+          mv $dstFullPath $thumbFullPath
+          chmod a+rw $thumbFullPath
         fi
-        echo gm convert -quality 60 $srcFullPath $dstFullPath 
-        gm convert -quality 60 $srcFullPath $dstFullPath
-        echo "Conversion took $SECONDS seconds."
+        gm convert -quality 60 $srcFullPath $dstFullPath   
+        chmod a+rw $dstFullPath
+      else
+        msg "Generating low quality jpeg image thumb"
+        dstFullPath="${path}thumbs/${dstFile}.jpg"
+        if [ -f "$dstFullPath" ]; then
+           rm $dstFullPath
+        fi        
+        fileFullPath="${path}fs/${dstFile}.jpg"
+        gm convert -quality 60 -resize 400x $fileFullPath $dstFullPath  
+        chmod a+rw $dstFullPath  
       fi
+      echo "Conversion took $SECONDS seconds."
   done
+
