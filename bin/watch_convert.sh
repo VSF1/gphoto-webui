@@ -190,7 +190,7 @@ fi
            rm $dstFullPath
         fi        
         fileFullPath="${path}fs/${dstFile}.jpg"
-        gm convert -quality 60 -resize 400x $fileFullPath $dstFullPath  
+        gm convert -quality 60 $fileFullPath $dstFullPath  
         chmod a+rw $dstFullPath  
       fi
       echo "Conversion took $SECONDS seconds."

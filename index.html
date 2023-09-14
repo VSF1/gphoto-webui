@@ -3,9 +3,17 @@
 <head>
 	<title>gphoto2 wrapper</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="css/jquery.mobile-1.4.2.css" />
-	<script src="js/jquery.js"></script>
-	<script src="js/jquery.mobile-1.4.2.js"></script>
+	<script src="js/jquery/1.10.2/jquery.js" type="text/javascript"></script>
+	<link rel="stylesheet" href="js/jquery-mobile/1.4.2/jquery.mobile.css" />	
+	<script src="js/jquery-mobile/1.4.2/jquery.mobile.js" type="text/javascript"></script>
+	<script src="js/fancybox/3.5.7/jquery.fancybox.min.js" type="text/javascript"></script>
+	
+	<!--script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js" integrity="sha512-STof4xm1wgkfm7heWqFJVn58Hm3EtS31XFaagaa8VMReCXAkQnJZ+jEy8PCC/iT18dFy95WcExNHFTqLyp72eQ==" crossorigin="anonymous" referrerpolicy="no-referrer" type="text/javascript"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-mobile/1.4.5/jquery.mobile.min.js" integrity="sha512-FbnNPigZZCDhMM22ezvan3xN2/E/oBd9GxqtpiBcK1VZuzBAt0V1EmTtteoYuYxWrqwqBA6zb1OTB887QSjAsw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha512-uURl+ZXMBrF4AwGaWmEetzrd+J5/8NRkWAvJx5sbPSSuOb0bZLqf+tOzniObO00BjHa/dD7gub9oCGMLPQHtQA==" crossorigin="anonymous" referrerpolicy="no-referrer" type="text/javascript"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha512-H9jrZiiopUdsLpg94A333EfumgUBpO9MdbxStdeITo+KEIMaNfHNvwyjjDJb+ERPaRS6DpyRlKbvPUasNItRyw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<script type="text/javascript">$.fancybox.defaults.buttons=["zoom", "slideShow","fullScreen","thumbs","close"];</script>	
+	<!--link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-mobile/1.4.5/jquery.mobile.min.css" integrity="sha512-z2AFOVKBqcloFCT+Ugs0icqTfC8fBoGq2zP60MlESnL9CdusjEyVnNvHgs3RWtdMJxGkP0FDWfNp/puIP9CctA==" crossorigin="anonymous" referrerpolicy="no-referrer" /-->
 	<script src="js/controller.js"></script>
 </head>
 
@@ -46,7 +54,7 @@
 		<div class="ui-grid-a my-breakpoint" id="galleryGrid"></div>	
 		<script type="text/html" id="galleryTemplate">
 			<div class="ui-block-@char" id="@id" style="text-align:center">
-				<p><img src="@imageThumb"/></p>
+				<p><a data-src="@imageLarge" data-caption="@imageName" href="javascript:void(0)	;" data-fancybox="preview"><img src="@imageThumb" /><a></p>
 				<p>@imageName</p>
 				<p><a target="_blank" href="service.php?action=getImage&file=@imageName">Download Source</a></p>
 				<p><a href="javascript:deleteFile('@imageName');">Delete</a></p>

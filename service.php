@@ -229,6 +229,7 @@ try{
 					$returnFile->name = $path_parts['basename'];
 					$returnFile->sourcePath = 'images/'.$file;
 					$returnFile->thumbPath = 'images/thumbs/'.$path_parts['filename'].'.jpg';
+					$returnFile->largePath = 'images/fs/'.$path_parts['filename'].'.jpg';
 					//$returnFile->md5 = readMD5('images/'.$file.'.md5');
 					array_push($files,$returnFile);
 				

@@ -87,6 +87,7 @@ function updateGalleryGrid(data){
 		}else{
 			var galleryTemplate = $("#galleryTemplate").text();
 			galleryTemplate = galleryTemplate.replace(/@imageThumb/g, image.thumbPath);
+			galleryTemplate = galleryTemplate.replace(/@imageLarge/g, image.largePath);
 			galleryTemplate = galleryTemplate.replace(/@char/g, uiClass);
 			galleryTemplate = galleryTemplate.replace(/@sourceURL/g, image.sourcePath);
 			galleryTemplate = galleryTemplate.replace(/@imageName/g, image.name);	
