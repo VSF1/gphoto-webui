@@ -65,11 +65,20 @@ fi
 ##################
 # SYNC SECTION
 ##################
-    
-inotifywait -r -e move_to,modify,create $src --exclude='*/' --filter='P .git' --filter='- *.md5' --filter='- *.tmp' |
-while read -r path event file; do  
-    SECONDS=0
-    rsync -at "${path}/${file}" "${dst}::${file}" --stop-after=1 --whole-file --timeout=10 --contimeout=10 --no-compress --progress --remove-source-files --exclude='*/' --filter='P .git' --filter='- *.md5' --filter='- *.tmp'
-    elapsed=$SECONDS
-    echo "Transfer took $elapsed seconds"
+
+# force inicial sync
+echo rsync -at "${src}" "${dst}" --stop-after=1 --whole-file --timeout=10 --contimeout=10 --no-compress --progress --remove-source-files --exclude='*/' --filter='P .git' --filter='- *.md5' --filter='- *.tmp'
+SECONDS=0
+rsync -at "${src}" "${dst}" --stop-after=1 --whole-file --timeout=10 --contimeout=10 --no-compress --progress --remove-source-files --exclude='*/' --filter='P .git' --filter='- *.md5' --filter='- *.tmp'
+elapsed=$SECONDS
+
+while : 
+do  
+    inotifywait -e move_to -e modify -e modify_write $src |
+    while read -r path event file; do  
+        SECONDS=0
+        rsync -at "${path}${file}" "${dst}/${file}" --stop-after=1 --whole-file --timeout=10 --contimeout=10 --no-compress --progress --remove-source-files --exclude='*/' --filter='P .git' --filter='- *.md5' --filter='- *.tmp'
+        elapsed=$SECONDS
+        echo "Transfer took $elapsed seconds"
+    done
 done
