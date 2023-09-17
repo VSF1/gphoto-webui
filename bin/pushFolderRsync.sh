@@ -74,7 +74,7 @@ elapsed=$SECONDS
 
 while : 
 do  
-    inotifywait -e move_to -e modify -e modify_write $src |
+    inotifywait --monitor "${src}" --event "moved_to" --exclude ".*\.xmp$"  |
     while read -r path event file; do  
         SECONDS=0
         rsync -at "${path}${file}" "${dst}/${file}" --stop-after=1 --whole-file --timeout=10 --contimeout=10 --no-compress --progress --remove-source-files --exclude='*/' --filter='P .git' --filter='- *.md5' --filter='- *.tmp'
