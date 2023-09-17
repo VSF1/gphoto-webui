@@ -93,7 +93,7 @@ do
     #    echo "copying $src/${files[1]}" 
     #	rsync -atq $src/${files[1]} $dst --stop-after=1 --partial --timeout=10 --contimeout=10 --no-compress --progress --remove-source-files --filter='P .git' --filter='- *.md5' --filter='- thumbs' --filter='- *.tmp'
     #fi
-    rsync -at $src $dst --stop-after=1 --whole-file --timeout=10 --contimeout=10 --no-compress --progress --remove-source-files --filter='P .git' --filter='- *.md5' --filter='- thumbs' --filter='- *.tmp'
+    rsync -at $src $dst --stop-after=1 --whole-file --timeout=10 --contimeout=10 --no-compress --progress --remove-source-files --exclude='*/' --filter='P .git' --filter='- *.md5' --filter='- thumbs' --filter='- *.tmp'
     elapsed=$SECONDS
     if [ "$elapsed" -ge 1 ]; then 
         echo "transfer took $elapsed seconds"
