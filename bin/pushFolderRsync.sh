@@ -76,9 +76,13 @@ while :
 do  
     inotifywait --monitor "${src}" --event "moved_to" --event "close_write" --exclude ".*\.xmp$"  |
     while read -r path event file; do  
-        SECONDS=0
-        rsync -at "${path}${file}" "${dst}/${file}" --stop-after=1 --whole-file --timeout=10 --contimeout=10 --no-compress --progress --remove-source-files --exclude='*/' --filter='P .git' --filter='- *.md5' --filter='- *.tmp'
-        elapsed=$SECONDS
-        echo "${event} Transfer took ${elapsed} seconds"
+        if [ -f "${path}${file}"]; then
+            SECONDS=0
+            rsync -at "${path}${file}" "${dst}/${file}" --stop-after=1 --whole-file --timeout=10 --contimeout=10 --no-compress --progress --remove-source-files --exclude='*/' --filter='P .git' --filter='- *.md5' --filter='- *.tmp'
+            elapsed=$SECONDS
+            echo "${event} Transfer took ${elapsed} seconds"
+        else
+            echo "${event} File ${path}${file} is missing!!!"
+        fi
     done
 done

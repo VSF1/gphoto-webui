@@ -90,9 +90,23 @@ if [ recursive == 1 ]; then
 fi
 
 HAVE_LUA=$("${DBUS_SEND}" --print-reply --type=method_call --dest=org.darktable.service /darktable org.freedesktop.DBus.Properties.Get string:org.darktable.service.Remote string:LuaEnabled 2>/dev/null)
-if [ $? -ne 0 ]; then
-  echo "darktable isn't running or DBUS isn't working properly"
-  exit 1
+if [ $? -ne 0 ] && [ "$i" -eq 6 ]; then
+  echo "starting darktable"
+  darktable &
+
+  for i in $(seq 1 6); do 
+    HAVE_LUA=$("${DBUS_SEND}" --print-reply --type=method_call --dest=org.darktable.service /darktable org.freedesktop.DBus.Properties.Get string:org.darktable.service.Remote string:LuaEnabled 2>/dev/null)
+    if [ $? -ne 0 ] && [ "$i" -eq 6 ]; then
+      echo "darktable isn't running or DBUS isn't working properly"
+      exit 1
+    else
+      break
+    fi
+    echo "waiting for darktable to load"
+    sleep 2
+  done
+else
+  echo "darktable already running"
 fi
 
 echo "${HAVE_LUA}" | grep "true$" >/dev/null
