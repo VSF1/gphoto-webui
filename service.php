@@ -30,24 +30,33 @@ if (isset($_GET['action'])){
 }
 
 if (isset($_GET['port'])){
-	$port = "usb:". $_GET['port'];
+	//$port = "usb:". $_GET['port'];
+	$port = $_GET['port'];
 }
 
+$cmdTetherStart="gphoto2 --capture-tethered --keep --port $port --hook-script=\"./bin/tetherHook.sh\" --filename \"./images/capture-%Y%m%d-%H%M%S-%03n.%C\"";
+$cmdTakePicture="gphoto2 --capture-image-and-download --port $port --filename \"./images/capture-%Y%m%d-%H%M%S-%03n.%C\"";
 // Execute $cmd in the background
 function execInBackground($cmd) {
-    if (substr(php_uname(), 0, 7) == "Windows"){
+    if (substr(php_uname(), 0, 7) == "Windows") {
         pclose(popen("start /B ". $cmd, "r"));  
     } else {
         exec($cmd . " > /dev/null &");   
     }
 }
 
-function processRunning(string $process): bool
+function processRunning(string $process, bool $isfullcmd=false)
 {
-    if (empty(trim(shell_exec("pgrep $process")))) {
+	if ($isfullcmd) {
+		$cmd="pgrep -f \"$process\"";
+	} else { 	
+		$cmd="pgrep $process";
+	} 
+	$result=trim(shell_exec($cmd));
+    if (empty($result)) {
         return false;
     } else {
-        return true;
+        return $result;
     }
 }
 
@@ -69,31 +78,27 @@ try{
 	switch($action){
 
 		case "startTether":
-			execInBackground ("gphoto2 --capture-tethered --keep --hook-script=\"./bin/tetherHook.sh\" --filename \"./images/capture-%Y%m%d-%H%M%S-%03n.%C\"");
-			echo json_encode(true);					
+			$returnObj = Cameras::tetherStart($gphoto2, $port);
+			header('Content-Type: application/json');
+			echo json_encode(returnObj);	
 			break;
 
-		case "stopTether":
-			if(processRunning("gphoto2")) {
-				execInBackground ("pkill -f gphoto2");
-			}
-			echo json_encode(true);					
+		case "stopTether":			
+			$returnObj = Cameras::tetherStop($gphoto2, $port);
+			header('Content-Type: application/json');
+			echo json_encode(returnObj);
 			break;
 
 		case "checkTetherStatus":
-				$returnObj = new TetherStatus();				
-				if(processRunning("gphoto2")) {			
-					$returnObj->status = "Tether Running";
-				} else {
-					$returnObj->status = "Tether Stopped";
-				}
-				header('Content-Type: application/json');
-				echo json_encode($returnObj);
-				break;
+			$returnObj = Cameras::checkTetherStatus($gphoto2, $port);
+			header('Content-Type: application/json');
+			echo json_encode($returnObj);
+			break;
 		
 		case "takePicture":
-			exec ("gphoto2 --capture-image-and-download --filename \"./images/capture-%Y%m%d-%H%M%S-%03n.%C\"",$output);
-			echo json_encode(true);					
+			$returnObj = Cameras::captureImageAndDownload($gphoto2, $port);
+			header('Content-Type: application/json');
+			echo json_encode($returnObj);
 			break;
 	
 		case "deleteFile":
@@ -117,23 +122,21 @@ try{
 			break;
 
 		case "getCamera":
-			$cameras = Cameras::getCameras()->cameras;
+			$cameras = Cameras::getCameras($gphoto2)->cameras;
 			if(!isset($cameras) || !isset($cameras[0])) {
+				$cameras[] = new Camera();
+				/* Simulate a second camera
 				$camera = new Camera();
-				$camera->camera = 'no camera found';
-				$camera->serialNumber = '';
-				$camera->batteryLevel = '';				
+				$camera->port = 'NA1';
+				$cameras[] = $camera;*/
 			}
-			else {
-				$camera=$cameras[0];
-			}
-			$returnObj=$camera;
+			$returnObj=$cameras;
 			header('Content-Type: application/json');
 			echo json_encode($returnObj);
 			break;
 
 		case "getCameras":
-			    $returnObj = Cameras::getCameras();
+			    $returnObj = Cameras::getCameras($gphoto2);
 				header('Content-Type: application/json');
 				echo json_encode($returnObj);
 				break;
@@ -147,7 +150,7 @@ try{
 			break;
 
 		case "getBatteryLevel":
-			$returnObj = new Camera();
+			$returnObj = new Camera($port);
 			exec ("gphoto2 --get-config batterylevel", $output);				
 			$returnObj->batteryLevel = trim(explode("Current:", $output[count($output) - 2])[1]);
 			header('Content-Type: application/json');

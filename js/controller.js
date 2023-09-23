@@ -2,7 +2,7 @@
 var cameraView=false;
 var galleryView=false;
 
-function takePicture(){
+function takePicture(cameraid){
 	$.mobile.loading( 'show', {
 		text: 'Taking Image....',
 		textVisible: true,
@@ -10,7 +10,11 @@ function takePicture(){
 	});
          
 	$.ajax({
-		url: "service.php?action=takePicture",
+		url: "service.php",
+		data:{ 
+			action: "takePicture", 
+			port: cameraid
+		},
 		dataType : "json",
 		success: function(data){
 			$.mobile.loading( 'hide');
@@ -18,14 +22,18 @@ function takePicture(){
 	});
 }
 
-function startTether(){
+function startTether(cameraid){
 	$.mobile.loading( 'show', {
 		text: 'Starting tether....',
 		textVisible: true,
 		theme: 'a'
 	});         	
 	$.ajax({
-		url: "service.php?action=startTether",
+		url: "service.php",
+		data:{ 
+			action: "startTether", 
+			port: cameraid
+		},
 		dataType : "json",
 		success: function(data){
 			$.mobile.loading( 'hide');
@@ -33,14 +41,18 @@ function startTether(){
 	});
 }
 
-function stopTether(){
+function stopTether(cameraid){
 	$.mobile.loading( 'show', {
 		text: 'Stop tether....',
 		textVisible: true,
 		theme: 'a'
 	});         	
 	$.ajax({
-		url: "service.php?action=stopTether",
+		url: "service.php",
+		data:{ 
+			action: "stopTether", 
+			port: cameraid
+		},
 		dataType : "json",
 		success: function(data){
 			$.mobile.loading( 'hide');
@@ -55,14 +67,21 @@ function checkCameraStatus() {
 	} 
 }
 
-function checkTetherStatus() {
+function checkTetherStatus(cameraid=-1) {
 	if (cameraView) {
 		setTimeout(checkTetherStatus, 5000);
 		$.ajax({
-			url: "service.php?action=checkTetherStatus",
+			url: "service.php",
+			data:{ 
+				action: "checkTetherStatus",
+				port: cameraid
+			},	
 			dataType : "json",
 			success: function(data){
-				$("#tetherStatus").html(data.status);
+				//$("#tetherStatus").html(data[0].status);
+				for(var i = 0; i < data.length; i++){
+					$("#tetherStatus-"+data[i].port).html("Tether Status: "+data[i].status);
+				}				
 			},
 		});
 	}
@@ -97,10 +116,39 @@ function updateGalleryGrid(data){
 	}
 }
 
+function updateCameraGrid(data){
+//	$("#cameraGrid").html("");
+	var cameraHTML = "";	
+	for(var i = 0; i < data.length; i++){
+
+		var camera = data[i];
+		var id = camera.port;
+
+		if ($('#' + id).length	> 0){
+			/*
+			$('#' + id).removeClass("ui-block-a");
+			$('#' + id).removeClass("ui-block-b");
+			$('#' + id).addClass("ui-block-" + uiClass);					
+			*/
+		}else{
+			var cameraTemplate = $("#cameraTemplate").text();
+			cameraTemplate = cameraTemplate.replace(/@cameraPort/g, camera.port);
+			cameraTemplate = cameraTemplate.replace(/@id/g, camera.port	);
+			cameraTemplate = cameraTemplate.replace(/@cameraName/g, camera.camera);
+			cameraTemplate = cameraTemplate.replace(/@cameraSerialNumber/g, camera.serialNumber);
+			cameraTemplate = cameraTemplate.replace(/@cameraBatteryLevel/g, camera.batteryLevel);
+			$("#cameraGrid").append(cameraTemplate);
+		}
+	}
+}
+
 function checkTetherTransfer() {
 	if (galleryView) {
 		$.ajax({
-			url: "service.php?action=getImages",
+			url: "service.php",
+			data:{ 
+				action: "getImages"
+			},			
 			dataType : "json",
 			success: function(data){
 				updateGalleryGrid(data);
@@ -115,7 +163,11 @@ function deleteFile(file){
 	$('#' + id).remove();
 
 	$.ajax({
-		url: "service.php?action=deleteFile&file=" + file,
+		url: "service.php",
+		data:{ 
+			action: "deleteFile",
+			file: file
+		},
 		dataType : "json",
 		success: function(data){		
 			$.ajax({
@@ -131,17 +183,23 @@ function deleteFile(file){
 
 function getCamera(){
 	$.ajax({
-		url: "service.php?action=getCamera",
+		url: "service.php",
+		data:{ 
+			action: "getCamera"
+		},
 		dataType : "json",
 		success: function(data){
-			$("#cameraInfo").html(data.camera + ' | SN:' + data.serialNumber + ' | Bat:' + data.batteryLevel);
+			updateCameraGrid(data);		
 		},
 	});
 }
 
 function getCameras(){
 	$.ajax({
-		url: "service.php?action=getCameras",
+		url: "service.php",
+		data:{ 
+			action: "getCameras"
+		},
 		dataType : "json",
 		success: function(data){
 			$("#cameraName").html(data.cameras);
@@ -149,9 +207,13 @@ function getCameras(){
 	});
 }
 
-function getSerialNumber(){
+function getSerialNumber(cameraid){
 	$.ajax({
-		url: "service.php?action=getSerialNumber",
+		url: "service.php",
+		data:{ 
+			action: "getSerialNumber", 
+			port: cameraid
+		},
 		dataType : "json",
 		success: function(data){
 			$("#serialNumber").html(data.serialNumber);
@@ -159,9 +221,13 @@ function getSerialNumber(){
 	});
 }
 
-function getBatteryLevel(){
+function getBatteryLevel(cameraid){
 	$.ajax({
-		url: "service.php?action=getBatteryLevel",
+		url: "service.php",
+		data:{ 
+			action: "getBatteryLevel", 
+			port: cameraid
+		},
 		dataType : "json",
 		success: function(data){
 			$("#batteryLevel").html(data.batteryLevel);

@@ -1,4 +1,5 @@
 <?php
+require_once("gPhoto2.php");
 
 /**
 * A class that defines a camera.
@@ -12,61 +13,75 @@ class Camera {
 	public string $shutterCounter;
 	public string $serialNumber;
 	public string $batteryLevel;
+	public array $availableCfg;	
 
-	function __construct() {        
+	function __construct($port='NA') {   
+		$this->port = ($port=='-1' ? 'NA': $port);
+		$this->camera = 'No Camera Detected';		
+		$this->serialNumber = 'NA';
+		$this->batteryLevel = 'NA';     				
     }
 	
-	public function updateInfo() {
-		$port = $this->port;
-		exec ("gphoto2 --get-config serialnumber --port " . $port, $output);
-		try {
-			$e=explode("Current:", $output[count($output) - 2]);
-			if (isset($e[1])) $this->serialNumber = ltrim(trim($e[1]),"0");
-		} catch (Exception $e) {
-		}
+	function __destruct() {
+		unset($availableCfg);
+    }
 	
-		exec ("gphoto2 --get-config shuttercounter --port " . $port, $output);
-		try {
-			$e=explode("Current:", $output[count($output) - 2]);
-			if (isset($e[1])) $this->shutterCounter = trim($e[1]);
-		} catch (Exception $e) {
-		}
-		
-		exec ("gphoto2 --get-config batterylevel --port " . $port, $output);				
-		try {
-			$e=explode("Current:", $output[count($output) - 2]);
-			if (isset($e[1])) $this->batteryLevel = trim($e[1]);
-		} catch (Exception $e) {
-		}
+	public function updateInfo(): bool {	
+		$this->availableCfg=$gphoto2->getConfigList($this->port);
+		$this->serialNumber=$gphoto2->getSerialNumber($this->port);	
+		$this->updateShutterCounter();
+		$this->updateBatteryLevel();
+		$this->cameraModel=$gphoto2->getCameraModel($this->port);
 
-		exec ("gphoto2 --get-config cameramodel --port " . $port, $output);
-		try {
-			$e=explode("Current:", $output[count($output) - 2]);
-			if (isset($e[1])) $this->cameraModel = trim($e[1]);
-		} catch (Exception $e) {
-		}
+		$this->manufacturer=$gphoto2->getManufacturer($this->port);
+		return true;
+	}	
 
-		exec ("gphoto2 --get-config manufacturer --port " . $port, $output);
-		try {
-			$e=explode("Current:", $output[count($output) - 2]);
-			if (isset($e[1])) $this->manufacturer = trim($e[1]);
-		} catch (Exception $e) {
-		}
+	public function captureImageAndDownload(): bool {
+		return $gphoto2->captureImageAndDownload($this->port);
+	} 
 
+	public function updateBatteryLevel(): bool { 
+		if ($this->configAvailable("batterylevel")){ 
+			$this->batteryLevel=$gphoto2->getBatteryLevel($this->port);
+			return true;
+		}
+		return false;	
+	}
+	
+	public function updateShutterCounter(): bool { 
+		if ($this->configAvailable("batterylevel")){ 
+			$this->shutterCounter=$gphoto2->getShutterCounter($this->port);
+			return true;
+		}
+		return false;	
+	}
+
+	public function configAvailable($config): bool { 
+		foreach($this->availableCfg as $key=>$value){
+			if("$config" == substr($key,-strlen($config))){
+			  // $number = substr($key,strrpos($key,'_'));
+			  return true;
+			}
+		  }
+		return false;
 	}	
 }
 
-class Cameras {
+class Cameras {	
 	public array $cameras;
-	function __construct() {
-        
+
+	function __construct() {        
     }
 
-	public static function getCameras() {
+	function __destruct() {        
+		unset($cameras);
+    }
+
+	public static function getCameras($gphoto2): Cameras {
 		$returnObj = new Cameras();
 		$returnObj->cameras=[];
-		exec ("gphoto2 --auto-detect", $output);
-		unset($output[0]);unset($output[1]);
+		$output=$gphoto2->getCameras();
 		foreach ($output as $line) {
 			$camera = new Camera();
 			$camera->camera = trim(explode("usb", $line)[0]);
@@ -74,8 +89,75 @@ class Cameras {
 			$camera->updateInfo();
 			$returnObj->cameras[] = $camera;
 		}
+		unset($output);		
 		return $returnObj;	
+	}
+
+	public static function checkTetherStatus($gphoto2, $port='-1') {
+		if ($port == "-1") { 
+			// check for all cameras
+			$cameras = Cameras::getCameras($gphoto2)->cameras;
+			foreach ($cameras as $camera) {
+				$tetherStatus = new TetherStatus($camera->port);
+				if($gphoto2->tetherIsRunning($camera->port)) {			
+					$tetherStatus->status = "Running";
+				} 
+				$returnObj[]=$tetherStatus;
+			}
+		} else {
+			// check for single camera
+			$tetherStatus = new TetherStatus($port);
+			if($gphoto2->tetherIsRunning($port)) {			
+				$tetherStatus->status = "Running";
+			} 
+			$returnObj[]=$tetherStatus;
+		} 
+
+		if(!isset($returnObj)){
+			$returnObj[]= new TetherStatus("NA");
+		}	
+		return $returnObj;
+	}
+	
+	public static function captureImageAndDownload($gphoto2, $port='-1'): bool {
+		if ($port == "-1") { 
+			// capture from all cameras
+			$cameras = Cameras::getCameras($gphoto2)->cameras;
+			foreach ($cameras as $camera) {
+				$gphoto2->captureImageAndDownload($camera->port);
+			}
+		} else {
+			// capture from single camera
+			$gphoto2->captureImageAndDownload($port);
+		} 
+		return true;			
 	}	
-		
+
+	public static function tetherStart($gphoto2, $port): bool {
+		if ($port == "-1") { 
+			// capture from all cameras
+			$cameras = Cameras::getCameras($gphoto2)->cameras;
+			foreach ($cameras as $camera) {
+				$gphoto2->tetherStart($camera->port);
+			}
+		} else {
+			// capture from single camera
+			$gphoto2->tetherStart($port);
+		} 
+		return true;
+	}	
+
+	public static function tetherStop($gphoto2, $port): bool {
+		if ($port == "-1") { 
+			// capture from all cameras
+			$cameras = Cameras::getCameras($gphoto2)->cameras;
+			foreach ($cameras as $camera) {
+				$gphoto2->tetherStop($camera->port);
+			}
+		} else {
+			// capture from single camera
+			$gphoto2->tetherStop($port);
+		} 
+		return true;
+	}	
 }
-?>
