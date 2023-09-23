@@ -80,7 +80,8 @@ function checkTetherStatus(cameraid=-1) {
 			success: function(data){
 				//$("#tetherStatus").html(data[0].status);
 				for(var i = 0; i < data.length; i++){
-					$("#tetherStatus-"+data[i].port).html("Tether Status: "+data[i].status);
+					id = data[i].port.replace(/[-\.\:\,]/g,'');
+					$("#tetherStatus-"+id).html("Tether Status: "+data[i].status);
 				}				
 			},
 		});
@@ -119,27 +120,30 @@ function updateGalleryGrid(data){
 function updateCameraGrid(data){
 //	$("#cameraGrid").html("");
 	var cameraHTML = "";	
+	elements = document.querySelectorAll(`div[id^="camera-"]`);	
+	for (var i = 0; i < elements.length; i++){
+		elements[i].classList.add("camera-removed");
+	}		
 	for(var i = 0; i < data.length; i++){
-
 		var camera = data[i];
-		var id = camera.port;
+		var id = camera.port.replace(/[-\.\:\,]/g,'');
 
-		if ($('#' + id).length	> 0){
-			/*
-			$('#' + id).removeClass("ui-block-a");
-			$('#' + id).removeClass("ui-block-b");
-			$('#' + id).addClass("ui-block-" + uiClass);					
-			*/
+		if ($('#camera-' + id).length	> 0){			
+			$('#camera-' + id).removeClass("camera-removed");
 		}else{
 			var cameraTemplate = $("#cameraTemplate").text();
 			cameraTemplate = cameraTemplate.replace(/@cameraPort/g, camera.port);
-			cameraTemplate = cameraTemplate.replace(/@id/g, camera.port	);
+			cameraTemplate = cameraTemplate.replace(/@id/g, id);
 			cameraTemplate = cameraTemplate.replace(/@cameraName/g, camera.camera);
 			cameraTemplate = cameraTemplate.replace(/@cameraSerialNumber/g, camera.serialNumber);
 			cameraTemplate = cameraTemplate.replace(/@cameraBatteryLevel/g, camera.batteryLevel);
 			$("#cameraGrid").append(cameraTemplate);
 		}
 	}
+	elements = document.getElementsByClassName("camera-removed");	
+	for (var i = 0; i < elements.length; i++){
+		elements[i].parentNode.removeChild(elements[i]);
+	} 
 }
 
 function checkTetherTransfer() {

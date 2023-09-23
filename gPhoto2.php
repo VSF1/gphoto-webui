@@ -37,7 +37,8 @@ class gPhoto2 {
 	public function tetherStop($port): bool {
 		$cmdTetherStart="gphoto2 --capture-tethered --keep --port $port --hook-script=\"./bin/tetherHook.sh\" --filename \"./images/capture-%Y%m%d-%H%M%S-%03n.%C\"";
 		if(($pid=processRunning($cmdTetherStart, true))) {
-			shell_exec ("pkill -f $pid");
+			//echo "kill -9 $pid";
+			shell_exec ("kill -9 $pid");
 			return true;
 		} else {
 			return false;
@@ -72,7 +73,7 @@ class gPhoto2 {
 			if (isset($e[1])) return trim($e[1]);
 		} catch (Exception $e) {
 		}		
-		return null;
+		return "";
 	} 
 
 	public function getSerialNumber($port){		

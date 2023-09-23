@@ -80,13 +80,13 @@ try{
 		case "startTether":
 			$returnObj = Cameras::tetherStart($gphoto2, $port);
 			header('Content-Type: application/json');
-			echo json_encode(returnObj);	
+			echo json_encode($returnObj);	
 			break;
 
 		case "stopTether":			
 			$returnObj = Cameras::tetherStop($gphoto2, $port);
 			header('Content-Type: application/json');
-			echo json_encode(returnObj);
+			echo json_encode($returnObj);
 			break;
 
 		case "checkTetherStatus":

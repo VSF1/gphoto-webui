@@ -83,7 +83,7 @@ do
             elapsed=$SECONDS
             echo "${event} Transfer took ${elapsed} seconds"
         else
-            echo "${event} File ${path}${file} is missing!!!"
+            #echo "${event} File ${path}${file} is missing!!!"
         fi
     done
 done

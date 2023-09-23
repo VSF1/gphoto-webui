@@ -29,9 +29,9 @@
 
 		<div role="main" class="ui-content" style="text-align:center;" id="cameraGrid">
 			<script type="text/html" id="cameraTemplate">
-				<div id="@id">
+				<div id="camera-@id">
 					<h2 id="cameraInfo">Port: @cameraPort | @cameraName | SN: @cameraSerialNumber | Bat: @cameraBatteryLevel </h1>
-					<h3 id="tetherStatus-@cameraPort">Tether Status: @cameraTetherStatus</h1>
+					<h3 id="tetherStatus-@id">Tether Status: @cameraTetherStatus</h1>
 					<button onclick="takePicture('@cameraPort')" id="snap"><img src="aperture.png" width="64"></button>	
 					<button onclick="startTether('@cameraPort')" id="startTether">Start tether</button>
 					<button onclick="stopTether('@cameraPort')" id="stopTether">Stop tether</button>

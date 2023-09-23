@@ -14,8 +14,10 @@ class Camera {
 	public string $serialNumber;
 	public string $batteryLevel;
 	public array $availableCfg;	
+	private gPhoto2 $gphoto2;
 
 	function __construct($port='NA') {   
+		$this->gphoto2=new gPhoto2();
 		$this->port = ($port=='-1' ? 'NA': $port);
 		$this->camera = 'No Camera Detected';		
 		$this->serialNumber = 'NA';
@@ -24,26 +26,27 @@ class Camera {
 	
 	function __destruct() {
 		unset($availableCfg);
+		unset($gphoto2);
     }
 	
 	public function updateInfo(): bool {	
-		$this->availableCfg=$gphoto2->getConfigList($this->port);
-		$this->serialNumber=$gphoto2->getSerialNumber($this->port);	
+		$this->availableCfg=$this->gphoto2->getConfigList($this->port);
+		$this->serialNumber=$this->gphoto2->getSerialNumber($this->port);	
 		$this->updateShutterCounter();
 		$this->updateBatteryLevel();
-		$this->cameraModel=$gphoto2->getCameraModel($this->port);
+		$this->cameraModel=$this->gphoto2->getCameraModel($this->port);
 
-		$this->manufacturer=$gphoto2->getManufacturer($this->port);
+		$this->manufacturer=$this->gphoto2->getManufacturer($this->port);
 		return true;
 	}	
 
 	public function captureImageAndDownload(): bool {
-		return $gphoto2->captureImageAndDownload($this->port);
+		return $this->gphoto2->captureImageAndDownload($this->port);
 	} 
 
 	public function updateBatteryLevel(): bool { 
 		if ($this->configAvailable("batterylevel")){ 
-			$this->batteryLevel=$gphoto2->getBatteryLevel($this->port);
+			$this->batteryLevel=$this->gphoto2->getBatteryLevel($this->port);
 			return true;
 		}
 		return false;	
@@ -51,7 +54,7 @@ class Camera {
 	
 	public function updateShutterCounter(): bool { 
 		if ($this->configAvailable("batterylevel")){ 
-			$this->shutterCounter=$gphoto2->getShutterCounter($this->port);
+			$this->shutterCounter=$this->gphoto2->getShutterCount($this->port);
 			return true;
 		}
 		return false;	
@@ -150,10 +153,11 @@ class Cameras {
 	public static function tetherStop($gphoto2, $port): bool {
 		if ($port == "-1") { 
 			// capture from all cameras
-			$cameras = Cameras::getCameras($gphoto2)->cameras;
+			$cameras = Cameras::getCameras($gphoto2)->cameras;		
 			foreach ($cameras as $camera) {
+				echo "$camera->port";
 				$gphoto2->tetherStop($camera->port);
-			}
+			}			
 		} else {
 			// capture from single camera
 			$gphoto2->tetherStop($port);

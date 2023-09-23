@@ -137,7 +137,7 @@ fi
       [[ ! -z "${GEEQIE}" ]] && "${GEEQIE}" --remote "${path}/${file}"
       "${DBUS_SEND}" --type=method_call --dest=org.darktable.service /darktable org.darktable.service.Remote.Lua string:"local dt = require('darktable') dt.database.import('${path}/${file}') dt.print('a new image was added')"
     else
-      [[ ! -z "${GEEQIE}" ]] && "${GEEQIE}" --remote "${path}/${file}"
+      [[ ! -z "${GEEQIE}" ]] && "${GEEQIE}" --remote "${path}/${file}" || echo "geeqie not available"
       ID=$("${DBUS_SEND}" --print-reply --type=method_call --dest=org.darktable.service /darktable org.darktable.service.Remote.Open string:"${path}/${file}" | tail --lines 1 | sed 's/.* //')
       if [ "${ID}" -eq 0 ]; then
         # TODO: maybe try to wait a few seconds and retry? Not sure if that is needed.
