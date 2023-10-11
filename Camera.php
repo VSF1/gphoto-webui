@@ -31,8 +31,8 @@ class Camera {
 	
 	public function updateInfo(): bool {	
 		$this->availableCfg=$this->gphoto2->getConfigList($this->port);
-		$this->serialNumber=$this->gphoto2->getSerialNumber($this->port);	
-		$this->updateShutterCounter();
+		$this->updateSerialNumber();
+		$this->updateShutterCount();
 		$this->updateBatteryLevel();
 		$this->cameraModel=$this->gphoto2->getCameraModel($this->port);
 
@@ -52,9 +52,17 @@ class Camera {
 		return false;	
 	}
 	
-	public function updateShutterCounter(): bool { 
-		if ($this->configAvailable("batterylevel")){ 
+	public function updateShutterCount(): bool { 
+		if ($this->configAvailable("shuttercount")){ 
 			$this->shutterCounter=$this->gphoto2->getShutterCount($this->port);
+			return true;
+		}
+		return false;	
+	}
+	
+	public function updateSerialNumber(): bool { 
+		if ($this->configAvailable("serialnumber")){ 
+			$this->serialNumber=$this->gphoto2->getSerialNumber($this->port);
 			return true;
 		}
 		return false;	

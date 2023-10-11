@@ -8,8 +8,8 @@ if [[ $FILENAME =~ .+\.[jpg|JPG] ]];then
   # shot the picture in the current geeqie open
   # cp $ARGUMENT latest.jpg
 #  /usr/bin/geeqie --remote "$ARGUMENT" &
-  mv "$ARGUMENT" "$FILENAME"
-  md5sum "$FILENAME" > "$FILENAME.md5"
+# mv "$ARGUMENT" "$FILENAME"
+  #md5sum "$FILENAME" > "$FILENAME.md5"
 fi
 
 if [[ $FILENAME =~ .+\.[arw|ARW|mrw|MRW] ]];then
@@ -19,7 +19,7 @@ if [[ $FILENAME =~ .+\.[arw|ARW|mrw|MRW] ]];then
   # shot the picture in the current geeqie open
   # cp $ARGUMENT latest.arw
 #  /usr/bin/geeqie --remote "$ARGUMENT" &
-  mv "$ARGUMENT" "$FILENAME"
-  md5sum "$FILENAME" > "$FILENAME.md5"
+#  mv "$ARGUMENT" "$FILENAME"
+  #md5sum "$FILENAME" > "$FILENAME.md5"
 fi
  
