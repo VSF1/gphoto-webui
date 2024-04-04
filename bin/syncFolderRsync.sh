@@ -31,10 +31,9 @@ dst="$2"
 # OPTIONS SECTION
 ##################
 
-if [ $# -eq 0 ]
-then
+if [ $# -eq 0 ]; then
     printf "\n%s\t\t%s\n\n" "Use ${bold}-h${normal} for help."
-     exit 1
+    exit 1
 else
     while getopts ":h" option
     do
@@ -76,7 +75,7 @@ else
             ;;
         esac    
     done
-shift $((OPTIND -1))
+    shift $((OPTIND -1))
 fi
 
 ##################
@@ -97,8 +96,8 @@ do
     elapsed=$SECONDS
     if [ "$elapsed" -ge 1 ]; then 
         echo "transfer took $elapsed seconds"
-	sleep 1
+	    sleep 1
     else
-	sleep 6
+	    sleep 6
     fi
 done

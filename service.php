@@ -1,18 +1,10 @@
 <?php
-
-//ini_set('display_errors', 1);
-//ini_set('display_startup_errors', 1);
-//error_reporting(E_ALL);
-
+require_once("config.php");
 require_once("CameraRaw.php");
 require_once("gPhoto2.php");
 require_once("Camera.php");
 require_once("ReturnFile.php");
 require_once("TetherStatus.php");
-require_once("IniFile.php");
-
-// read setup
-$config = IniFile::read("cfg/config.ini");
 
 //time gphoto2 --quiet --capture-image-and-download --filename "./images/capture-%Y%m%d-%H%M%S-%03n.%C"
 //exec ("gphoto2 --set-config uilock=1",$output);
@@ -34,8 +26,6 @@ if (isset($_GET['port'])){
 	$port = $_GET['port'];
 }
 
-$cmdTetherStart="gphoto2 --capture-tethered --keep --port $port --hook-script=\"./bin/tetherHook.sh\" --filename \"./images/capture-%Y%m%d-%H%M%S-%03n.%C\"";
-$cmdTakePicture="gphoto2 --capture-image-and-download --port $port --filename \"./images/capture-%Y%m%d-%H%M%S-%03n.%C\"";
 // Execute $cmd in the background
 function execInBackground($cmd) {
     if (substr(php_uname(), 0, 7) == "Windows") {
@@ -52,11 +42,11 @@ function processRunning(string $process, bool $isfullcmd=false)
 	} else { 	
 		$cmd="pgrep $process";
 	} 
-	$result=trim(shell_exec($cmd));
+	$result=shell_exec($cmd);
     if (empty($result)) {
         return false;
     } else {
-        return $result;
+        return trim($result);
     }
 }
 
@@ -245,6 +235,7 @@ try{
 			echo json_encode($returnObj);
 			break;
 		default:
+			echo "Unknown command";
 			break;
 	}
 } catch (Exception $e) { //else resize the image...
