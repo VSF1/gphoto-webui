@@ -74,7 +74,7 @@ echo "${event} Transfer took ${elapsed} seconds"
 
 while : 
 do  
-    inotifywait --monitor "${src}" --event "moved_to" --event "close_write" --exclude ".*\.xmp$"  |
+    inotifywait --monitor "${src}" --event "moved_to" --exclude ".*\.xmp$"  |
     while read -r path event file; do  
         if [ -f "${path}${file}" ]; then
             SECONDS=0

@@ -14,6 +14,7 @@ require_once("TetherStatus.php");
 //exec ("gphoto2 --set-config uilock=1",$output);
 //echo join("\n",$output);
 
+$basepath = '/srv/shifucc';
 $action = '';
 $port = '';
 
@@ -93,9 +94,9 @@ try{
 	
 		case "deleteFile":
 			$file = $_GET['file'];
-			$path_parts = pathinfo('images/'.$file);
-			unlink('images/'.$file);				
-			unlink('images/thumbs/'.$path_parts['basename'].'.jpg');				
+			$path_parts = pathinfo($basepath.'/'.$file);
+			unlink($basepath.'/'.$file);				
+			unlink($basepath.'/previews/'.$path_parts['basename'].'.jpg');				
 			header('Content-Type: application/json');
 			echo json_encode(true);					
 			break;
@@ -105,8 +106,8 @@ try{
 			$file = $_GET['file'];
 			header('Content-Type: application/octet-stream');
 			header('Content-Disposition: attachment; filename="'.$file.'"');
-			header('Content-Length: '.filesize('images/'.$file));
-			$fp = fopen('images/'.$file, 'rb');
+			header('Content-Length: '.filesize($basepath.'/'.$file));
+			$fp = fopen($basepath.'/'.$file, 'rb');
 			fpassthru($fp);
 			exit;
 			break;
@@ -155,30 +156,30 @@ try{
 			echo json_encode($returnObj);
 			break;
 		case "getImagesList":
-			$imageDir = opendir('images');
+			$imageDir = opendir($basepath);
 			while (($file = readdir($imageDir)) !== false) {			
-				if(!is_dir('images/'.$file)){			
-					if (!file_exists('images/'.$file.'.md5')) {
-						exec('md5sum images/'.$file.' > images/'.$file.'.md5');
+				if(!is_dir($basepath.'/'.$file)){			
+					if (!file_exists($basepath.'/'.$file.'.md5')) {
+						exec('md5sum '.$basepath.'/'.$file.' > '.$basepath.'/'.$file.'.md5');
 					}			
-					$path_parts = pathinfo('images/'.$file);
+					$path_parts = pathinfo($basepath.'/'.$file);
 					if($path_parts["extension"] != "md5") {
-						echo readMD5('images/'.$file.'.md5').' '.$file."\r\n";
+						echo readMD5($basepath.'/'.$file.'.md5').' '.$file."\r\n";
 					}
 				}
 			}
 			closedir($imageDir);
 			break;
 		case "getFirstImageName":
-			$imageDir = opendir('images');
+			$imageDir = opendir($basepath);
 			while (($file = readdir($imageDir)) !== false) {			
-				if(!is_dir('images/'.$file)){			
-					if (!file_exists('images/'.$file.'.md5')) {
-						exec('md5sum images/'.$file.' > images/'.$file.'.md5');
+				if(!is_dir($basepath.'/'.$file)){			
+					if (!file_exists($basepath.'/'.$file.'.md5')) {
+						exec('md5sum '.$basepath.'/'.$file.' > '.$basepath.'/'.$file.'.md5');
 					}			
-					$path_parts = pathinfo('images/'.$file);
+					$path_parts = pathinfo($basepath.'/'.$file);
 					if($path_parts["extension"] != "md5") {
-						echo readMD5('images/'.$file.'.md5').' '.$file."\r\n";
+						echo readMD5($basepath.'/'.$file.'.md5').' '.$file."\r\n";
 						break;
 					}
 				}
@@ -188,10 +189,10 @@ try{
 					
 		case "getImages":	
 			$files = array();
-			$imageDir = opendir('images');
+			$imageDir = opendir($basepath);
 			while (($file = readdir($imageDir)) !== false) {			
-				if(!is_dir('images/'.$file) && CameraRaw::isImageFile('images/'.$file)){
-					$path_parts = pathinfo('images/'.$file);
+				if(!is_dir($basepath.'/'.$file) && CameraRaw::isImageFile($basepath.'/'.$file)){
+					$path_parts = pathinfo($basepath.'/'.$file);
 					/*										
 					if (!file_exists('images/'.$file.'.md5')) {
 						exec('md5sum images/'.$file.' > images/'.$file.'.md5');
@@ -221,7 +222,7 @@ try{
 					$returnFile = new ReturnFile();
 					$returnFile->name = $path_parts['basename'];
 					$returnFile->sourcePath = 'images/'.$file;
-					$returnFile->thumbPath = 'images/thumbs/'.$path_parts['filename'].'.jpg';
+					$returnFile->thumbPath = 'images/previews/'.$path_parts['filename'].'.jpg';
 					$returnFile->largePath = 'images/fs/'.$path_parts['filename'].'.jpg';
 					//$returnFile->md5 = readMD5('images/'.$file.'.md5');
 					array_push($files,$returnFile);
