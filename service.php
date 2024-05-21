@@ -63,6 +63,42 @@ function readMD5(string $file): string
 	return ''; 
 }
 
+function getDirContents($path) {
+	$directory = new RecursiveDirectoryIterator($path, FilesystemIterator::FOLLOW_SYMLINKS);  
+	$filter = new \RecursiveCallbackFilterIterator($directory, function ($current, $key, $iterator) {
+		// Skip hidden files and directories.  
+		if ($current->getFilename()[0] === '.') {
+			return FALSE;
+		} else if ($current->isDir()) {
+			// Only recurse into intended subdirectories.
+			# return $current->getFilename() === 'wanted_dirname';
+			if ($current->getFilename() === 'previews') return FALSE;
+			else if ($current->getFilename() === 'fs') return FALSE;
+			else return TRUE;
+		} else if ($current->isFile()) {
+			return TRUE; 
+		} else {
+			// Only consume files of interest.
+			#return strpos($current->getFilename(), 'wanted_filename') === 0;
+			return FALSE;
+		}
+	});
+
+	$iterator = new RecursiveIteratorIterator($filter);
+	$files = array();
+	foreach ($iterator as $info) 
+		$files[] = $info->getPathname();
+	return $files;
+}
+
+function createPath(string $path): bool {
+	$parts = pathinfo($path);
+	if (!file_exists($parts['dirname'])) {
+		mkdir($parts['dirname'], 0777, true);
+	}
+	return true;
+} 
+
 $returnObj;
 
 try{
@@ -95,10 +131,11 @@ try{
 		case "deleteFile":
 			$file = $_GET['file'];
 			$path_parts = pathinfo($basepath.'/'.$file);
-			unlink($basepath.'/'.$file);				
-			unlink($basepath.'/previews/'.$path_parts['basename'].'.jpg');				
+			unlink($basepath.'/'.$file);
+			unlink($basepath.'/.previews/'.$file.'-preview.jpg');
+			unlink($basepath.'/.fs/'.$file.'-fs.jpg');
 			header('Content-Type: application/json');
-			echo json_encode(true);					
+			echo json_encode(true);
 			break;
 			
 		case "getFile":
@@ -156,9 +193,9 @@ try{
 			echo json_encode($returnObj);
 			break;
 		case "getImagesList":
-			$imageDir = opendir($basepath);
-			while (($file = readdir($imageDir)) !== false) {			
-				if(!is_dir($basepath.'/'.$file)){			
+			$files = getDirContents($basepath);
+			foreach ($files as $file) {
+				if(!is_dir($basepath.'/'.$file)){
 					if (!file_exists($basepath.'/'.$file.'.md5')) {
 						exec('md5sum '.$basepath.'/'.$file.' > '.$basepath.'/'.$file.'.md5');
 					}			
@@ -168,7 +205,6 @@ try{
 					}
 				}
 			}
-			closedir($imageDir);
 			break;
 		case "getFirstImageName":
 			$imageDir = opendir($basepath);
@@ -188,50 +224,60 @@ try{
 			break;
 					
 		case "getImages":	
-			$files = array();
-			$imageDir = opendir($basepath);
-			while (($file = readdir($imageDir)) !== false) {			
-				if(!is_dir($basepath.'/'.$file) && CameraRaw::isImageFile($basepath.'/'.$file)){
-					$path_parts = pathinfo($basepath.'/'.$file);
-					/*										
-					if (!file_exists('images/'.$file.'.md5')) {
-						exec('md5sum images/'.$file.' > images/'.$file.'.md5');
-					}
-					if (!file_exists('images/fs/'.$path_parts['basename'].'.jpg')){
+			$ret_files = array();
+			$files = getDirContents($basepath);
+			foreach($files as $file_path) {				
+				$file = substr($file_path, strlen($basepath)+1);				
+				$basefile_full_path = $basepath.'/'.$file;
+				$fullsizefile_rel_path = 'fs/'.$file.'-fs.jpg';
+				$fullsizefile_full_path = $basepath.'/'.$fullsizefile_rel_path;
+				$previewfile_rel_path = 'previews/'.$file.'-preview.jpg';
+				$previewfile_full_path = $basepath.'/'.$previewfile_rel_path;
+				if(!is_dir($basefile_full_path) && CameraRaw::isImageFile($basefile_full_path)){
+					$path_parts = pathinfo($file_path);
+					#if (!file_exists($basepath.'/'.$file.'.md5')) {
+					#	exec('md5sum '.$basepath.'/'.$file.' > images/'.$file.'.md5');
+					#}
+					if (!file_exists($fullsizefile_full_path)){
+						createPath($fullsizefile_full_path);
 						// create a full size version
 						try { 
-							CameraRaw::generateImageJPG('images/'.$file, 'images/fs/'.$path_parts['basename'].'.jpg');
+							echo $basefile_full_path . "<br/>";
+							echo "CameraRaw::generateImageJPG($basefile_full_path, $fullsizefile_full_path);";
+							CameraRaw::generateImageJPG($basefile_full_path, $fullsizefile_full_path);
 						} catch (Exception $e) {
 							echo get_current_user() . '    ';
 							echo $e;
 							die;
 						}
 					}				
-					if (!file_exists('images/thumbs/'.$path_parts['basename'].'.jpg')){
+					if (!file_exists($previewfile_full_path)){
+						createPath($previewfile_full_path);
 						try { //try to extract the preview image from the RAW
-							CameraRaw::extractPreview('images/'.$file, 'images/thumbs/'.$path_parts['basename'].'.jpg');
+							echo "CameraRaw::extractPreview($basefile_full_path, $previewfile_full_path);";
+							CameraRaw::extractPreview($basefile_full_path, $previewfile_full_path);
 						} catch (Exception $e) { //else resize the image...
-							$im = new \Gmagick('images/'.$file);
+							// sudo apt install graphicsmagick php-gmagick
+							$im = new \Gmagick($basefile_full_path);
 							$im->setImageFormat('jpg');
-							$im->scaleImage(400,0);					
-							$im->writeImage('images/thumbs/'.$path_parts['basename'].'.jpg');
+							$im->scaleImage(1500,0);					
+							$im->writeImage($previewfile_full_path);
 							$im->clear();
 							$im->destroy();
 						}
-					}*/				
+					}
 					$returnFile = new ReturnFile();
 					$returnFile->name = $path_parts['basename'];
 					$returnFile->sourcePath = 'images/'.$file;
-					$returnFile->thumbPath = 'images/previews/'.$path_parts['filename'].'.jpg';
-					$returnFile->largePath = 'images/fs/'.$path_parts['filename'].'.jpg';
+					$returnFile->thumbPath = 'images/'.$previewfile_rel_path;
+					$returnFile->largePath = 'images/'.$fullsizefile_rel_path;
 					//$returnFile->md5 = readMD5('images/'.$file.'.md5');
-					array_push($files,$returnFile);
+					array_push($ret_files, $returnFile);
 				
 					unset($returnFile);
 				}
 			}
-			closedir($imageDir);
-			$returnObj = $files;
+			$returnObj = $ret_files;
 			header('Content-Type: application/json');
 			echo json_encode($returnObj);
 			break;

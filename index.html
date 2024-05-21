@@ -47,13 +47,14 @@
 			<a href="#camera" class="ui-btn-left ui-btn ui-btn-b ui-btn-inline ui-mini ui-corner-all ui-btn-icon-right ui-icon-back">Camera</a>			
 		</div><!-- /header -->
 		<div role="main" class="ui-content">	
-		<div class="ui-grid-a my-breakpoint" id="galleryGrid"></div>	
+		<div class="ui-grid-a my-breakpoint" id="galleryGrid"></div>
 		<script type="text/html" id="galleryTemplate">
 			<div class="ui-block-@char" id="@id" style="text-align:center">
-				<p><a data-src="@imageLarge" data-caption="@imageName" href="javascript:void(0)	;" data-fancybox="preview"><img src="@imageThumb" /><a></p>
-				<p>@imageName</p>
-				<p><a target="_blank" href="service.php?action=getImage&file=@imageName">Download Source</a></p>
-				<p><a href="javascript:deleteFile('@imageName');">Delete</a></p>
+				<small>
+					<p><a data-src="@imageLarge" data-caption="@imageName" href="javascript:void(0)	;" data-fancybox="preview"><img src="@imageThumb" /><a></p>
+					<p>[@imageNumber/@imageTotal] - @imageName <a target="_blank" href="service.php?action=getImage&file=@imageName">Download Source</a>
+					<a href="javascript:deleteFile('@imageName');">Delete</a></p>
+				</small>
 			</div>
 		</script>		
 		</div><!-- /content -->
