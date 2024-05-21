@@ -1,6 +1,6 @@
 //var galleryImages;
-var cameraView=false;
-var galleryView=false;
+var cameraView = false;
+var galleryView = false;
 
 function takePicture(cameraid){
 	$.mobile.loading( 'show', {
