@@ -92,11 +92,7 @@ function updateGalleryGrid(data){
 	//$("#galleryGrid").html("");
 	var galleryHTML = "";	
 	for(var i = 0; i < data.length; i++){
-		var uiClass = "a";
-		if (i % 2 == 1){
-			uiClass = "b";
-		} 
-
+		var uiClass = (i % 2 == 1) ? "b" : "a";
 		var image = data[i];
 		var id = image.name.replace(/[-\.]/g,'');
 
@@ -106,6 +102,8 @@ function updateGalleryGrid(data){
 			$('#' + id).addClass("ui-block-" + uiClass);					
 		}else{
 			var galleryTemplate = $("#galleryTemplate").text();
+			galleryTemplate = galleryTemplate.replace(/@imageTotal/g, data.length);
+			galleryTemplate = galleryTemplate.replace(/@imageNumber/g, i + 1);
 			galleryTemplate = galleryTemplate.replace(/@imageThumb/g, image.thumbPath);
 			galleryTemplate = galleryTemplate.replace(/@imageLarge/g, image.largePath);
 			galleryTemplate = galleryTemplate.replace(/@char/g, uiClass);
