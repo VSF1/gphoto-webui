@@ -9,7 +9,9 @@
 	<script src="js/fancybox/3.5.7/jquery.fancybox.min.js" type="text/javascript"></script>
 	<link rel="stylesheet" href="js/fancybox/3.5.7/jquery.fancybox.min.css"/>
 	<script src="js/controller.js"></script>
-	<script type="text/javascript">$.fancybox.defaults.buttons=["zoom", "slideShow","fullScreen","thumbs","close"];</script>
+	<script type="text/javascript">
+		$.fancybox.defaults.buttons=["zoom", "slideShow","fullScreen","thumbs","close"];
+	</script>
 </head>
 
 <style>
@@ -45,13 +47,14 @@
 			<a href="#camera" class="ui-btn-left ui-btn ui-btn-b ui-btn-inline ui-mini ui-corner-all ui-btn-icon-right ui-icon-back">Camera</a>			
 		</div><!-- /header -->
 		<div role="main" class="ui-content">	
-		<div class="ui-grid-a my-breakpoint" id="galleryGrid"></div>	
+		<div class="ui-grid-a my-breakpoint" id="galleryGrid"></div>
 		<script type="text/html" id="galleryTemplate">
 			<div class="ui-block-@char" id="@id" style="text-align:center">
-				<p><a data-src="@imageLarge" data-caption="@imageName" href="javascript:void(0)	;" data-fancybox="preview"><img src="@imageThumb" /><a></p>
-				<p>@imageName</p>
-				<p><a target="_blank" href="service.php?action=getImage&file=@imageName">Download Source</a></p>
-				<p><a href="javascript:deleteFile('@imageName');">Delete</a></p>
+				<small>
+					<p><a data-src="@imageLarge" data-caption="@imageName" href="javascript:void(0)	;" data-fancybox="preview"><img src="@imageThumb" /><a></p>
+					<p>[@imageNumber/@imageTotal] - @imageName <a target="_blank" href="service.php?action=getImage&file=@imageName">Download Source</a>
+					<a href="javascript:deleteFile('@imageName');">Delete</a></p>
+				</small>
 			</div>
 		</script>		
 		</div><!-- /content -->
