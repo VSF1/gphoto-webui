@@ -38,12 +38,22 @@ die() {
 parse_params() {
   # default values of variables set from params
   recursive=0
+  editor=DARKTABLE
+  viewer=
 
   while :; do
     case "${1-}" in
     -h | --help) usage ;;
     -v | --verbose) set -x ;;
     --no-color) NO_COLOR=1 ;;
+    -e | --editor)
+	    editor="${2}"
+	    shift
+	    ;;
+    --viewer)
+	    viewer="${2}"
+	    shift
+	    ;;
     -r | --recursice) recursive=1 ;; # example flag
     -?*) die "Unknown option: $1" ;;
     *) break ;;
@@ -81,27 +91,50 @@ if [ $? -ne 0 ]; then
 fi
 
 GEEQIE=$(which geeqie)
-if [ $? -ne 0 ]; then
+if [[ $? -ne 0 ]]; then
   echo "can't find 'geeqie' in PATH" 
 fi
+if [[ -z "${viewer}" ]]; then
+  GEEQIE=
+fi
+
+DARKTABLE=$(which darktable)
+if [[ $? -ne 0 && "${editor}" == "DARKTABLE" ]]; then
+  echo "can't find 'darktable' in PATH"
+fi
+if [[ ! -z "${DARKTABLE}" && "${editor}" != "DARKTABLE" ]]; then
+  DARKTABLE=
+fi
+
+RAWTHERAPEE=$(which rawtherapee)
+if [[ $? -ne 0 ]]; then
+  echo "can't find 'rawtherapee' in PATH"
+fi
+if [[ ! -z "${RAWTHERAPEE}" && "${editor}" == "RAWTHERAPEE" ]]; then
+  "${RAWTHERAPEE}" -R &
+else
+  RAWTHERAPEE=
+fi
+
+echo "Using editor ${editor}"
 
 INOTIFYWAIT=$(which inotifywait)
-if [ $? -ne 0 ]; then
+if [[ $? -ne 0 ]]; then
   echo "can't find 'inotifywait' in PATH"
   exit 1
 fi
-if [ recursive == 1 ]; then
+if [[ $recursive -ne 0 ]]; then
   INOTIFYWAIT=$INOTIFYWAIT -r
 fi
 
 HAVE_LUA=$("${DBUS_SEND}" --print-reply --type=method_call --dest=org.darktable.service /darktable org.freedesktop.DBus.Properties.Get string:org.darktable.service.Remote string:LuaEnabled 2>/dev/null)
-if [ $? -ne 0 ] && [ "$i" -eq 6 ]; then
+if [[ $? -ne 0 ]] && [[ "$i" -eq 6 ]] && [[ ! -z "${DARKTABLE}" ]]; then
   echo "starting darktable"
   darktable &
 
   for i in $(seq 1 6); do 
     HAVE_LUA=$("${DBUS_SEND}" --print-reply --type=method_call --dest=org.darktable.service /darktable org.freedesktop.DBus.Properties.Get string:org.darktable.service.Remote string:LuaEnabled 2>/dev/null)
-    if [ $? -ne 0 ] && [ "$i" -eq 6 ]; then
+    if [[ $? -ne 0 ]] && [[ "$i" -eq 6 ]]; then
       echo "darktable isn't running or DBUS isn't working properly"
       exit 1
     else
@@ -111,7 +144,7 @@ if [ $? -ne 0 ] && [ "$i" -eq 6 ]; then
     sleep 2
   done
 else
-  echo "darktable already running"
+  [[ ! -z "${DARKTABLE}" ]] && echo "darktable already running"
 fi
 
 echo "${HAVE_LUA}" | grep "true$" >/dev/null
@@ -121,30 +154,34 @@ cleanup() {
   "${DBUS_SEND}" --type=method_call --dest=org.darktable.service /darktable org.darktable.service.Remote.Lua string:"require('darktable').print('stopping to watch \`${BASE_FOLDER}\'')"
 }
 
-if [ ${HAVE_LUA} -eq 0 ]; then
-  echo "Using Lua to load images, no error handling but uninterrupted workflow"
-  "${DBUS_SEND}" --type=method_call --dest=org.darktable.service /darktable org.darktable.service.Remote.Lua string:"require('darktable').print('watching \`${BASE_FOLDER}\'')"
-  trap cleanup INT
-  trap "echo; echo clean up done. bye" EXIT
-else
-  echo "darktable doesn't seem to support Lua, loading images directly. This results in better error handling but might interrupt the workflow"
+if [[ ! -z "${DARKTABLE}" ]]; then
+  if [[ ${HAVE_LUA} -eq 0 ]]; then
+    echo "Using Lua to load images, no error handling but uninterrupted workflow"
+    "${DBUS_SEND}" --type=method_call --dest=org.darktable.service /darktable org.darktable.service.Remote.Lua string:"require('darktable').print('watching \`${BASE_FOLDER}\'')"
+    trap cleanup INT
+    trap "echo; echo clean up done. bye" EXIT
+  else
+    echo "darktable doesn't seem to support Lua, loading images directly. This results in better error handling but might interrupt the workflow"
+  fi
 fi
 
 "${INOTIFYWAIT}" --monitor "${BASE_FOLDER}" --event "moved_to" --event "close_write" --exclude ".*\.xmp$" |
   while read -r path event file; do
-    if [ ${HAVE_LUA} -eq 0 ]; then
-      echo "'${file}' added"
-      [[ ! -z "${GEEQIE}" ]] && "${GEEQIE}" --remote "${path}/${file}"
-      "${DBUS_SEND}" --type=method_call --dest=org.darktable.service /darktable org.darktable.service.Remote.Lua string:"local dt = require('darktable') dt.database.import('${path}/${file}') dt.print('a new image was added')"
-    else
-      [[ ! -z "${GEEQIE}" ]] && "${GEEQIE}" --remote "${path}/${file}" || echo "geeqie not available"
-      ID=$("${DBUS_SEND}" --print-reply --type=method_call --dest=org.darktable.service /darktable org.darktable.service.Remote.Open string:"${path}/${file}" | tail --lines 1 | sed 's/.* //')
-      if [ "${ID}" -eq 0 ]; then
-        # TODO: maybe try to wait a few seconds and retry? Not sure if that is needed.
-        echo "'${file}' couldn't be added"
+    [[ ! -z "${GEEQIE}" ]] && "${GEEQIE}" --remote "${path}/${file}"
+    [[ ! -z "${RAWTHERAPEE}" ]] && "${RAWTHERAPEE}" -R "${path}/${file}" &
+   
+    if [[ ! -z "${DARKTABLE}" ]]; then
+      if [[ ${HAVE_LUA} -eq 0 ]]; then
+        echo "'${file}' added"
+        "${DBUS_SEND}" --type=method_call --dest=org.darktable.service /darktable org.darktable.service.Remote.Lua string:"local dt = require('darktable') dt.database.import('${path}/${file}') dt.print('a new image was added')"
       else
-        echo "'${file}' added with id ${ID}"
+        ID=$("${DBUS_SEND}" --print-reply --type=method_call --dest=org.darktable.service /darktable org.darktable.service.Remote.Open string:"${path}/${file}" | tail --lines 1 | sed 's/.* //')
+        if [ "${ID}" -eq 0 ]; then
+          # TODO: maybe try to wait a few seconds and retry? Not sure if that is needed.
+          echo "'${file}' couldn't be added"
+        else
+          echo "'${file}' added with id ${ID}"
+        fi
       fi
-    fi
-
+    fi # darktable
   done
